@@ -1,0 +1,6 @@
+{
+  "name": "Nexo Link Personal",
+  "description": "Link de bio conversível para personal trainers com jornada guiada e handoff no WhatsApp",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
