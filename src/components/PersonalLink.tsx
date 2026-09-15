@@ -660,7 +660,7 @@ export const PersonalLink: React.FC = () => {
                     {/* Step 6: Name (texto, obrigatório, mínimo 2 caracteres) */}
                     {step === 6 && (
                       <QuestionCard
-                        title="Como o personal deve te chamar?"
+                        title="Como podemos te chamar?"
                         subtitle="Informe seu nome para que seu atendimento seja personalizado."
                       >
                         <form onSubmit={handleFinishNameStep} className="flex flex-col gap-4">
@@ -879,7 +879,7 @@ export const PersonalLink: React.FC = () => {
                           : 'font-serif text-3xl font-normal tracking-tight text-[#1A1A1A]'
                       } mb-2 leading-snug`}
                     >
-                      Tudo pronto, {resolvedName || (personal.journey?.niche === 'eventos' ? 'Cliente' : 'Aluno')}.
+                      Tudo pronto{resolvedName ? `, ${resolvedName}` : ''}.
                     </h1>
 
                     <p
@@ -1127,15 +1127,8 @@ export const PersonalLink: React.FC = () => {
             ))}
           </footer>
         ) : (
-          <footer className="w-full p-4 sm:p-5 text-center border-t border-[#F0F0F0] mt-auto flex items-center justify-between text-[10px] text-[#BBB] uppercase tracking-widest font-mono">
-            <span>Via Nexo Link Personal</span>
-            <a
-              id="footer-sou-personal-link"
-              href="#"
-              className="hover:text-[#1A1A1A] transition-colors"
-            >
-              É personal? ↗
-            </a>
+          <footer className="w-full p-4 sm:p-5 text-center border-t border-[#F0F0F0] mt-auto flex items-center justify-center text-[10px] text-[#BBB] uppercase tracking-widest font-mono">
+            <span>Via Nexo Link</span>
           </footer>
         )}
       </div>

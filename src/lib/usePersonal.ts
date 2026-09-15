@@ -88,5 +88,48 @@ export function usePersonal(slug?: string): UsePersonalResult {
     };
   }, [slug]);
 
+  // Atualização dinâmica de título e meta tags para SEO e compartilhamento social
+  useEffect(() => {
+    if (!personal) {
+      if (notFound) {
+        document.title = 'Nexo Link · Profissional não encontrado';
+      }
+      return;
+    }
+
+    const pageTitle = [personal.name, personal.profession || personal.tagline].filter(Boolean).join(' · ');
+    const pageDescription =
+      personal.tagline ||
+      personal.profession ||
+      'Link de bio conversível com jornada guiada e contato qualificado via WhatsApp.';
+    const pagePhoto = personal.photo;
+
+    document.title = pageTitle;
+
+    const setMetaTag = (attrName: 'name' | 'property', attrVal: string, content: string) => {
+      let el = document.querySelector(`meta[${attrName}="${attrVal}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attrName, attrVal);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    setMetaTag('name', 'description', pageDescription);
+    setMetaTag('property', 'og:title', pageTitle);
+    setMetaTag('property', 'og:description', pageDescription);
+    setMetaTag('name', 'twitter:title', pageTitle);
+    setMetaTag('name', 'twitter:description', pageDescription);
+
+    if (pagePhoto) {
+      const fullPhotoUrl = pagePhoto.startsWith('http')
+        ? pagePhoto
+        : `${window.location.origin}${pagePhoto}`;
+      setMetaTag('property', 'og:image', fullPhotoUrl);
+      setMetaTag('name', 'twitter:image', fullPhotoUrl);
+    }
+  }, [personal, notFound]);
+
   return { personal, loading, notFound };
 }

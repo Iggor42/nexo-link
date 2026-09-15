@@ -13,7 +13,7 @@ export const NotFoundPersonal: React.FC = () => {
       <div className="w-full max-w-md bg-white/95 backdrop-blur-xs border border-[#E5E5E1] shadow-xl sm:shadow-2xl rounded-2xl sm:rounded-[36px] overflow-hidden flex flex-col relative p-6 sm:p-8 text-center items-center">
         <header className="w-full pb-4 text-center border-b border-[#F0F0F0] mb-6">
           <span className="text-[10px] uppercase tracking-widest text-[#888] font-mono">
-            Nexo Link Personal
+            Nexo Link
           </span>
         </header>
 
@@ -27,7 +27,7 @@ export const NotFoundPersonal: React.FC = () => {
           id="not-found-heading"
           className="font-serif text-3xl sm:text-4xl font-normal tracking-tight text-[#1A1A1A] mb-3 leading-snug"
         >
-          Este personal ainda está chegando.
+          Este profissional ainda está chegando.
         </h1>
 
         <p className="text-[#555] text-sm leading-relaxed max-w-xs mb-8">
@@ -39,7 +39,7 @@ export const NotFoundPersonal: React.FC = () => {
           href="#"
           className="w-full py-3.5 px-6 rounded-xl bg-[#1A1A1A] hover:bg-[#2A2A2A] text-white font-medium text-sm sm:text-base tracking-wide transition-all shadow-sm flex items-center justify-center gap-2 border border-[#1A1A1A]"
         >
-          <span>Sou personal, quero o meu</span>
+          <span>Sou profissional, quero o meu</span>
           <span aria-hidden="true">↗</span>
         </a>
 
@@ -53,7 +53,7 @@ export const NotFoundPersonal: React.FC = () => {
         </div>
 
         <footer className="mt-6 pt-4 border-t border-[#F0F0F0] w-full text-center text-[10px] text-[#BBB] uppercase tracking-widest">
-          Via Nexo Link Personal
+          Via Nexo Link
         </footer>
       </div>
     </div>
