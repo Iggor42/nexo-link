@@ -1,0 +1,128 @@
+{
+  "slug": "caiooliveira",
+  "name": "Caio Oliveira",
+  "profession": "Barman & Coquetelaria Premium para Eventos",
+  "city": "Montes Claros/MG",
+  "since": 2008,
+  "photo": "/assets/caio-perfil.webp",
+  "theme": {
+    "accent": "#E4032E",
+    "variant": "glass",
+    "backgroundImage": "/assets/caio-bg.webp"
+  },
+  "footer": {
+    "lines": [
+      "@caiooliveirabarman",
+      "Coquetelaria para eventos · Montes Claros/MG"
+    ]
+  },
+  "instagram": "caiooliveirabarman",
+  "whatsapp": "5538991114636",
+  // para ativar o Nexo Concierge: concierge: true
+  //   (requer backend hospedado + VITE_CONCIERGE_WEBHOOK)
+  "concierge": false,
+  "journey": {
+    "niche": "eventos",
+    "steps": [
+      {
+        "id": "goal",
+        "type": "single",
+        "title": "Qual é o tipo do seu evento?",
+        "subtitle": "Isso define o formato base do serviço",
+        "field": "goal",
+        "options": [
+          { "id": "casamento", "label": "Casamento" },
+          { "id": "aniversario", "label": "Aniversário ou festa" },
+          { "id": "corporativo", "label": "Corporativo" },
+          { "id": "formatura", "label": "Formatura" },
+          { "id": "outro", "label": "Outro" }
+        ]
+      },
+      {
+        "id": "availability",
+        "type": "single",
+        "title": "Quando será o evento?",
+        "subtitle": "Para conferir a agenda do Caio",
+        "field": "availability",
+        "options": [
+          { "id": "30d", "label": "Próximos 30 dias" },
+          { "id": "1a3m", "label": "Em 1 a 3 meses" },
+          { "id": "3a6m", "label": "Em 3 a 6 meses" },
+          { "id": "semdata", "label": "Ainda sem data" }
+        ]
+      },
+      {
+        "id": "experience",
+        "type": "single",
+        "title": "Quantos convidados você espera?",
+        "subtitle": "Dimensiona equipe e volume de bebidas",
+        "field": "experience",
+        "options": [
+          { "id": "ate50", "label": "Até 50" },
+          { "id": "50a100", "label": "50 a 100" },
+          { "id": "100a200", "label": "100 a 200" },
+          { "id": "200mais", "label": "Mais de 200" }
+        ]
+      },
+      {
+        "id": "modality",
+        "type": "single",
+        "title": "Qual estilo de serviço combina com seu evento?",
+        "subtitle": "O Caio monta a proposta a partir daqui",
+        "field": "modality",
+        "options": [
+          { "id": "openbar", "label": "Open bar" },
+          { "id": "autorais", "label": "Drinks autorais" },
+          { "id": "experiencia", "label": "Experiência de coquetelaria" },
+          { "id": "completo", "label": "Serviço completo com equipe" },
+          { "id": "naosei", "label": "Ainda não sei" }
+        ]
+      },
+      {
+        "id": "restrictions",
+        "type": "multi",
+        "title": "Algum pedido especial?",
+        "subtitle": "Selecione todos que se aplicam",
+        "field": "restrictions",
+        "options": [
+          { "id": "mocktails", "label": "Opções sem álcool (mocktails)" },
+          { "id": "espaco", "label": "Espaço com restrições" },
+          { "id": "tematico", "label": "Menu temático" },
+          { "id": "nenhum", "label": "Nenhum" }
+        ]
+      },
+      {
+        "id": "difficulty",
+        "type": "single",
+        "title": "Qual sua maior dificuldade hoje?",
+        "subtitle": "O Nexo começa a conversa por aqui",
+        "field": "difficulty",
+        "options": [
+          { "id": "quantidade", "label": "Calcular quantidade de bebida" },
+          { "id": "menu", "label": "Escolher o menu" },
+          { "id": "custo", "label": "Fechar o custo" },
+          { "id": "estrutura", "label": "Estruturar o serviço" },
+          { "id": "soorcamento", "label": "Só quero um orçamento" }
+        ]
+      },
+      {
+        "id": "name",
+        "type": "text",
+        "title": "Qual é o seu nome?",
+        "subtitle": "Para o atendimento ser personalizado",
+        "field": "name",
+        "placeholder": "Seu nome",
+        "required": true
+      },
+      {
+        "id": "phone",
+        "type": "phone",
+        "title": "Qual seu número de WhatsApp com DDD?",
+        "subtitle": "O Nexo, concierge digital do Caio, te chama em seguida",
+        "field": "phone",
+        "placeholder": "(38) 99999-9999",
+        "required": true
+      }
+    ]
+  }
+}

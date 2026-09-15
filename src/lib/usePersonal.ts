@@ -39,12 +39,31 @@ export function usePersonal(slug?: string): UsePersonalResult {
         }
 
         const rawText = await response.text();
-        // Clean out any // comments just in case the JSON contains documentation comments
-        const cleanText = rawText.replace(/\/\/.*$/gm, '');
-        const data = JSON.parse(cleanText) as Personal;
+        // Parse directly or strip comments if present without destroying URLs (e.g. https://)
+        let data: Personal;
+        try {
+          data = JSON.parse(rawText) as Personal;
+        } catch {
+          // Only if standard JSON.parse fails, strip single line comments that start at line beginning or after whitespace
+          const cleanText = rawText.replace(/^\s*\/\/.*$/gm, '');
+          data = JSON.parse(cleanText) as Personal;
+        }
 
         if (!data.slug || !data.name || !data.whatsapp) {
           throw new Error(`Dados incompletos no JSON de "${slug}"`);
+        }
+
+        // Variáveis de ambiente de preview têm prioridade caso webhook ou secret estejam vazios ou ausentes
+        const envWebhook = (import.meta.env.VITE_CONCIERGE_WEBHOOK as string | undefined)?.trim();
+        const envSecret = (import.meta.env.VITE_CONCIERGE_SECRET as string | undefined)?.trim();
+
+        if (data.concierge) {
+          if (!data.conciergeWebhook && envWebhook) {
+            data.conciergeWebhook = envWebhook;
+          }
+          if (!data.conciergeSecret && envSecret) {
+            data.conciergeSecret = envSecret;
+          }
         }
 
         if (isMounted) {

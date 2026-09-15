@@ -7,6 +7,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/p/:slug" element={<PersonalLink />} />
+        <Route path="/:slug" element={<PersonalLink />} />
         <Route path="/" element={<Navigate to="/p/lucaspersonal" replace />} />
         <Route path="*" element={<NotFoundPersonal />} />
       </Routes>

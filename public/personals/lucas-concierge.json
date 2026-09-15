@@ -1,0 +1,15 @@
+{
+  "slug": "lucas-concierge",
+  "name": "Lucas Personal",
+  "cref": "",
+  "tagline": "Emagrecimento, hipertrofia e performance — online e presencial.",
+  "specialties": ["Emagrecimento", "Hipertrofia", "Performance"],
+  "whatsapp": "5538991909079",
+  "instagram": "lucaspersonal.j",
+  "photo": "/personals/lucaspersonal.jpg",
+  "accent": "#B91C1C",
+  "socialProof": "",
+  "concierge": true,
+  "conciergeWebhook": "http://localhost:3333/webhooks/nexolink",
+  "conciergeSecret": "nexo_secret_token"
+}

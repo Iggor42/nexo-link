@@ -5,6 +5,7 @@ interface TiltCardProps {
   photo: string;
   name: string;
   accent?: string;
+  variant?: string;
   className?: string;
 }
 
@@ -12,6 +13,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
   photo,
   name,
   accent = '#B91C1C',
+  variant,
   className = '',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -76,20 +78,28 @@ export const TiltCard: React.FC<TiltCardProps> = ({
           aria-hidden="true"
           className="absolute inset-0 rounded-full pointer-events-none translate-x-[3px] translate-y-[3px] -z-10"
           style={{
-            border: `1px solid ${accent}66`,
+            border: `1px solid ${accent}${variant === 'glass' ? '88' : '66'}`,
+            boxShadow: variant === 'glass' ? `0 0 16px ${accent}44` : undefined,
           }}
         />
 
-        {/* Imagem com sombra multicamadas: shadow-[0_20px_40px_-10px_${accent}40,0_8px_16px_-4px_rgba(0,0,0,0.1)] */}
+        {/* Imagem com sombra multicamadas */}
         <img
           id="personal-avatar"
           src={photo}
           alt={name}
           loading="eager"
           fetchPriority="high"
-          className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border border-[#E5E5E1] bg-[#FAF9F6] block"
+          className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover block ${
+            variant === 'glass'
+              ? 'border-2 border-[rgba(255,235,210,0.3)] bg-black/20'
+              : 'border border-[#E5E5E1] bg-[#FAF9F6]'
+          }`}
           style={{
-            boxShadow: `0 20px 40px -10px ${accent}40, 0 8px 16px -4px rgba(0, 0, 0, 0.1)`,
+            boxShadow:
+              variant === 'glass'
+                ? `0 20px 40px -10px ${accent}55, 0 0 25px ${accent}33, 0 8px 16px -4px rgba(0, 0, 0, 0.45)`
+                : `0 20px 40px -10px ${accent}40, 0 8px 16px -4px rgba(0, 0, 0, 0.1)`,
           }}
           referrerPolicy="no-referrer"
         />

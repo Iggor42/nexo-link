@@ -20,6 +20,21 @@
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 }
 
+.font-glass-serif {
+  font-family: 'Cormorant Garamond', 'Newsreader', Georgia, serif;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+}
+
+.font-glass-sans {
+  font-family: 'Manrope', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+}
+
+.glass-text-shadow {
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+}
+
 /* Camada 2: Deriva lenta de orbes flutuantes (25s - 35s) */
 @keyframes drift {
   0% {
