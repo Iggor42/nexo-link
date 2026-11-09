@@ -176,6 +176,16 @@ export const TenantLink: React.FC = () => {
     return <NotFoundTenant />;
   }
 
+  // Enquanto alguma condição ainda não foi respondida, o total exibido
+  // usa heroSteps (o caminho mais longo) — senão o passo 1 mostraria
+  // só os steps sem `when` (ex.: "Passo 01 de 03" na Akis).
+  const hasUnresolvedCondition = dynamicSteps.some(
+    (s) => s.when && dynamicAnswers[s.when.field] === undefined
+  );
+  const progressTotal = hasUnresolvedCondition
+    ? tenant.journey?.heroSteps || totalSteps
+    : totalSteps;
+
   // Step 3D Transition Variants
   const stepVariants = {
     enter: (dir: number) => ({
@@ -305,7 +315,7 @@ export const TenantLink: React.FC = () => {
               >
                 <ProgressBar
                   currentStep={step}
-                  totalSteps={totalSteps}
+                  totalSteps={progressTotal}
                   accentColor={accent}
                   variant={variant}
                   onBack={() => goToStep(step - 1)}
@@ -624,6 +634,20 @@ export const TenantLink: React.FC = () => {
                     ou chama no direct @{tenant.instagram.replace(/^@/, '')}
                   </motion.a>
                 )}
+
+                {/* Voltar ao início: sem ele, o resumo era um beco sem saída */}
+                <button
+                  id="back-to-start-btn"
+                  type="button"
+                  onClick={() => goToStep(0)}
+                  className={`inline-block text-xs underline underline-offset-4 transition-colors py-1 mt-1 cursor-pointer bg-transparent border-0 ${
+                    isGlass
+                      ? 'text-[rgba(255,235,210,0.65)] hover:text-[#FFF4E6]'
+                      : 'text-[#888] hover:text-[#1A1A1A]'
+                  }`}
+                >
+                  ← Voltar ao início
+                </button>
               </motion.div>
             )}
           </AnimatePresence>

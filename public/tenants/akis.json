@@ -216,8 +216,8 @@
             "label": "Look Completo / Consultoria"
           }
         ],
-        "subtitle": "Selecione suas categorias de interesse",
-        "title": "O que você procura?",
+        "subtitle": "Selecione uma ou mais",
+        "title": "Quais categorias te interessam?",
         "type": "multi",
         "when": {
           "equals": "store",
