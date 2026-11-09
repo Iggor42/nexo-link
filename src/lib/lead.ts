@@ -1,14 +1,5 @@
 import { z } from 'zod';
-import {
-  OBJETIVO_OPTIONS,
-  EXPERIENCE_OPTIONS,
-  RESTRICTIONS_OPTIONS,
-  AVAILABILITY_OPTIONS,
-  MODALITY_OPTIONS,
-  getLabel,
-  getMultipleLabels,
-} from '../config/questions';
-import type { LeadData, UTMParams, ConciergeWebhookPayload } from '../types';
+import type { UTMParams, ConciergeWebhookPayload, JourneyStep } from '../types';
 
 export function cleanPhoneDigits(val: string): string {
   return val.replace(/\D/g, '');
@@ -39,25 +30,17 @@ export const PhoneSchema = z.string().refine(
   { message: 'Informe um WhatsApp válido com DDD (10 ou 11 dígitos).' }
 );
 
-export const LeadSchema = z.object({
-  objetivo: z.string().min(1, 'Selecione um objetivo'),
-  experience: z.string().min(1, 'Selecione seu nível atual'),
-  restrictions: z.array(z.string()).min(1, 'Selecione ao menos uma opção'),
-  availability: z.string().min(1, 'Selecione a frequência semanal'),
-  modality: z.string().min(1, 'Selecione a modalidade de treino'),
-  difficulty: z.string().optional(),
-  name: z.string().trim().min(2, 'O nome deve conter pelo menos 2 caracteres'),
-  phone: z.string().optional(),
-});
-
 export interface ConciergeSendResult {
   success: boolean;
   error?: string;
 }
 
-export async function sendConciergeWebhook(
-  webhookUrl: string,
-  secret: string | undefined,
+/**
+ * Envia o lead ao Concierge VIA PROXY server-side (/api/lead).
+ * O segredo do webhook nunca sai do servidor — o browser só fala com
+ * a mesma origem. Em falha, o chamador aciona o fallback wa.me.
+ */
+export async function sendConciergeViaProxy(
   payload: ConciergeWebhookPayload,
   timeoutMs = 5000
 ): Promise<ConciergeSendResult> {
@@ -65,16 +48,9 @@ export async function sendConciergeWebhook(
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (secret) {
-      headers['x-nexo-secret'] = secret;
-    }
-
-    const response = await fetch(webhookUrl, {
+    const response = await fetch('/api/lead', {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
@@ -82,9 +58,16 @@ export async function sendConciergeWebhook(
     clearTimeout(timer);
 
     if (!response.ok) {
+      let detail = '';
+      try {
+        const data = (await response.json()) as { error?: string };
+        if (data?.error) detail = `: ${data.error}`;
+      } catch {
+        // corpo não-JSON; mantém só o status
+      }
       return {
         success: false,
-        error: `Servidor retornou status ${response.status}`,
+        error: `Proxy retornou status ${response.status}${detail}`,
       };
     }
 
@@ -99,81 +82,66 @@ export async function sendConciergeWebhook(
   }
 }
 
-export function buildWhatsAppMessage(lead: LeadData, utms: UTMParams = {}): string {
-  const name = lead.name.trim();
-  const objetivoLabel = getLabel(OBJETIVO_OPTIONS, lead.objetivo);
-  const experienceLabel = getLabel(EXPERIENCE_OPTIONS, lead.experience);
-  const restrictionsLabel = getMultipleLabels(RESTRICTIONS_OPTIONS, lead.restrictions);
-  const availabilityLabel = getLabel(AVAILABILITY_OPTIONS, lead.availability);
-  const modalityLabel = getLabel(MODALITY_OPTIONS, lead.modality);
-  const difficulty = lead.difficulty ? lead.difficulty.trim() : '';
+/** Valor sentinela da etapa de data quando o lead ainda não tem data definida. */
+export const NO_DATE_VALUE = 'sem-data';
 
-  const source = utms.utm_source || 'direto';
-  const medium = utms.utm_medium || 'organico';
-  let originLine = `Via Nexo Link | Origem: ${source}/${medium}`;
-
-  if (utms.utm_campaign) {
-    originLine += ` | Campanha: ${utms.utm_campaign}`;
-  }
-  if (utms.utm_content) {
-    originLine += ` | Conteúdo: ${utms.utm_content}`;
-  }
-
-  const lines: string[] = [
-    `Olá! Meu nome é ${name}.`,
-    '',
-    'Quero começar a treinar — avaliação inicial:',
-    `Objetivo: ${objetivoLabel}`,
-    `Nível hoje: ${experienceLabel}`,
-    `Limitações: ${restrictionsLabel}`,
-    `Rotina: ${availabilityLabel} · ${modalityLabel}`,
-  ];
-
-  if (difficulty.length > 0) {
-    lines.push(`Maior dificuldade: ${difficulty}`);
-  }
-
-  lines.push('');
-  lines.push('—');
-  lines.push(originLine);
-
-  return lines.join('\n');
+export function isISODateString(val: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(val);
 }
 
-export function buildDynamicWhatsAppMessage(
-  steps: import('../types').JourneyStep[],
-  answers: Record<string, unknown>,
-  utms: UTMParams = {},
-  niche?: string,
-  personalName?: string
-): string {
-  if (niche === 'eventos') {
-    const getFieldDisplay = (field: string): string => {
-      const step = steps.find((s) => s.field === field);
-      const val = answers[field];
-      if (!step || val === undefined || val === null || val === '') return '';
-      if (Array.isArray(val)) {
-        if (val.length === 0) return 'Nenhum';
-        return val
-          .map((v) => step.options?.find((o) => o.id === v)?.label || String(v))
-          .join(', ');
-      }
-      return step.options?.find((o) => o.id === val)?.label || String(val);
-    };
-
-    const name = typeof answers.name === 'string' && answers.name.trim() ? answers.name.trim() : 'Cliente';
-    const goal = getFieldDisplay('goal') || 'Geral';
-    const availability = getFieldDisplay('availability') || 'A combinar';
-    const experience = getFieldDisplay('experience') || 'Sob consulta';
-    const modality = getFieldDisplay('modality') || 'Personalizado';
-    const restrictions = getFieldDisplay('restrictions') || 'Nenhum';
-    const difficulty = getFieldDisplay('difficulty') || 'Orçamento geral';
-    const firstName = personalName ? personalName.trim().split(/\s+/)[0] : 'Caio';
-
-    return `Ola, ${firstName}! Sou ${name}. Montei meu pedido pelo link: evento ${goal}, ${availability}, cerca de ${experience} convidados, estilo ${modality}. Pedidos especiais: ${restrictions}. Maior dificuldade: ${difficulty}. Pode me passar um orcamento?`;
+/**
+ * Formata uma data ISO (yyyy-mm-dd) da etapa de agendamento em pt-BR,
+ * ex.: "sábado, 14 de novembro de 2026". Usa UTC para não deslocar o dia
+ * conforme o fuso do aparelho. O sentinela vira "Ainda sem data".
+ */
+export function formatEventDateBR(val: string): string {
+  if (val === NO_DATE_VALUE) return 'Ainda sem data';
+  if (!isISODateString(val)) return val;
+  const [y, m, d] = val.split('-').map((n) => parseInt(n, 10));
+  const date = new Date(Date.UTC(y, m - 1, d));
+  try {
+    return new Intl.DateTimeFormat('pt-BR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(date);
+  } catch {
+    return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
   }
+}
 
-  const name = typeof answers.name === 'string' && answers.name.trim() ? answers.name.trim() : 'Aluno';
+/** Formatação curta pt-BR (dd/mm/aaaa) a partir de ISO, para listas/chips. */
+export function formatEventDateShortBR(val: string): string {
+  if (!isISODateString(val)) return val;
+  const [y, m, d] = val.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+/** Resolve o rótulo de exibição da resposta de um step (single/multi/texto/data). */
+export function getStepDisplay(
+  steps: JourneyStep[],
+  answers: Record<string, unknown>,
+  field: string
+): string {
+  const step = steps.find((s) => s.field === field);
+  const val = answers[field];
+  if (!step || val === undefined || val === null || val === '') return '';
+  if (Array.isArray(val)) {
+    if (val.length === 0) return '';
+    return val
+      .map((v) => step.options?.find((o) => o.id === v)?.label || String(v))
+      .join(', ');
+  }
+  if (typeof val === 'string') {
+    if (step.type === 'date') return formatEventDateBR(val);
+    return step.options?.find((o) => o.id === val)?.label || val;
+  }
+  return String(val);
+}
+
+function buildOriginLine(utms: UTMParams = {}): string {
   const source = utms.utm_source || 'direto';
   const medium = utms.utm_medium || 'organico';
   let originLine = `Via Nexo Link | Origem: ${source}/${medium}`;
@@ -184,37 +152,59 @@ export function buildDynamicWhatsAppMessage(
   if (utms.utm_content) {
     originLine += ` | Conteúdo: ${utms.utm_content}`;
   }
+  return originLine;
+}
 
-  const lines: string[] = [
-    `Olá! Meu nome é ${name}.`,
-    '',
-    'Avaliação inicial:',
-  ];
+/**
+ * Monta a mensagem de fallback wa.me a partir da jornada dinâmica.
+ * Se o tenant definiu `whatsappTemplate` no JSON, usa o template com
+ * placeholders {name}, {tenant} e {field}; senão, gera o resumo genérico.
+ */
+export function buildDynamicWhatsAppMessage(
+  steps: JourneyStep[],
+  answers: Record<string, unknown>,
+  utms: UTMParams = {},
+  template?: string,
+  tenantName?: string
+): string {
+  const name =
+    typeof answers.name === 'string' && answers.name.trim()
+      ? answers.name.trim()
+      : 'Cliente';
+  const tenantFirst = tenantName ? tenantName.trim().split(/\s+/)[0] : '';
 
-  for (const step of steps) {
-    if (step.field === 'name' || step.field === 'phone') continue;
-    const rawVal = answers[step.field];
-    if (rawVal === undefined || rawVal === null || rawVal === '') continue;
+  let body: string;
 
-    if (Array.isArray(rawVal)) {
-      if (rawVal.length === 0) continue;
-      const labels = rawVal.map((v) => {
-        const match = step.options?.find((o) => o.id === v);
-        return match ? match.label : String(v);
-      });
-      lines.push(`${step.title}: ${labels.join(', ')}`);
-    } else if (typeof rawVal === 'string') {
-      const match = step.options?.find((o) => o.id === rawVal);
-      const label = match ? match.label : rawVal;
-      lines.push(`${step.title}: ${label}`);
+  if (template && template.trim()) {
+    body = template
+      .replace(/\{tenant\}/g, tenantFirst)
+      .replace(/\{name\}/g, name);
+    for (const step of steps) {
+      const display = getStepDisplay(steps, answers, step.field);
+      body = body.replace(
+        new RegExp(`\\{${step.field}\\}`, 'g'),
+        display
+      );
     }
+    // Remove placeholders não resolvidos e normaliza espaços
+    body = body
+      .replace(/\{[a-zA-Z0-9_]+\}/g, '')
+      .replace(/[ \t]{2,}/g, ' ')
+      .trim();
+  } else {
+    const lines: string[] = [`Olá! Meu nome é ${name}.`, '', 'Avaliação inicial:'];
+
+    for (const step of steps) {
+      if (step.field === 'name' || step.field === 'phone') continue;
+      const display = getStepDisplay(steps, answers, step.field);
+      if (!display) continue;
+      lines.push(`${step.title}: ${display}`);
+    }
+
+    body = lines.join('\n');
   }
 
-  lines.push('');
-  lines.push('—');
-  lines.push(originLine);
-
-  return lines.join('\n');
+  return `${body}\n\n—\n${buildOriginLine(utms)}`;
 }
 
 export function buildWhatsAppUrl(whatsapp: string, message: string): string {

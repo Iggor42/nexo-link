@@ -1,0 +1,72 @@
+# Nexo Link 2.0 — agendamento, sinal via Pix e prova social
+
+> Construído em 23/10/2026. Tudo **genérico e configurável por inquilino**
+> no JSON (`public/tenants/{slug}.json`). Sem config = sem mudança visual.
+
+## 1. Agendamento — etapa `type: "date"`
+
+Adicione uma etapa à jornada do inquilino:
+
+```json
+{
+  "id": "eventDate",
+  "field": "eventDate",
+  "type": "date",
+  "title": "Qual a data do evento?",
+  "subtitle": "Escolha o dia do evento ou continue sem data definida"
+}
+```
+
+- O lead escolhe a data num seletor (`input type=date`, mínimo = hoje)
+  ou toca em **"Ainda sem data"** (valor `sem-data`).
+- A data vai formatada em pt-BR (ex.: "sábado, 14 de novembro de 2026")
+  para o resumo final e para a mensagem de WhatsApp — basta referenciar
+  `{eventDate}` (o `field` da etapa) no `whatsappTemplate`.
+- **Datas ocupadas** (marcação manual, sem Google Calendar):
+
+```json
+"booking": { "busyDates": ["2026-11-14", "2026-12-05"] }
+```
+
+  Datas ocupadas aparecem listadas/marcadas na etapa e, se selecionadas,
+  bloqueiam o avanço com aviso. Também é possível declarar `busyDates`
+  dentro da própria etapa (os dois conjuntos são somados).
+- Inquilino sem etapa `date` na jornada: nada muda.
+
+**Caio:** etapa já adicionada (2ª da jornada) + `booking.busyDates: []`
+vazio — ele preenche as datas ocupadas reais quando tiver a lista.
+
+## 2. Sinal via Pix — bloco na tela final
+
+```json
+"pix": { "key": "chave@exemplo", "amount": 200, "label": "Sinal de reserva" }
+```
+
+- Bloco aparece na tela final/resumo, antes do CTA de WhatsApp,
+  **somente se `pix.key` estiver preenchida**. Ausente/vazio = oculto.
+- Chave com botão **copiar** (Clipboard API + feedback "Copiado ✓");
+  `amount` formatado em R$ (pt-BR). `label` e `amount` são opcionais.
+- Sem gateway: o lead copia a chave e confirma o pagamento no WhatsApp.
+- **Nunca** colocar chave/valor fictícios em inquilino real — os dados
+  reais entram quando o cliente fornecer.
+
+## 3. Prova social — carrossel de depoimentos
+
+```json
+"testimonials": [
+  { "name": "Nome", "eventType": "Casamento", "city": "Montes Claros/MG", "quote": "Frase do cliente." }
+]
+```
+
+- Carrossel (anterior/próximo + dots) na tela inicial do link,
+  **somente se o array tiver itens**. Vazio/ausente = seção oculta.
+- Nunca inventar depoimento em inquilino real — coletar com autorização.
+
+## Fixture de teste: `/exemplo`
+
+`public/tenants/exemplo.json` é um inquilino **fictício, claramente
+marcado como teste interno** (fora do registro da landing em
+`src/lib/tenants.ts`), com as 3 features ligadas: datas ocupadas
+`2026-11-14` e `2026-12-05`, Pix fictício `exemplo-teste@nexolink.test`
+(R$ 200) e 3 depoimentos fictícios. Acesse ` /exemplo` no preview/deploy
+para validar tudo sem tocar em caio/lucas.

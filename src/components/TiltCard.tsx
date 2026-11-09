@@ -85,7 +85,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
 
         {/* Imagem com sombra multicamadas */}
         <img
-          id="personal-avatar"
+          id="tenant-avatar"
           src={photo}
           alt={name}
           loading="eager"

@@ -3,7 +3,15 @@ import { motion } from 'framer-motion';
 import { QuestionCard } from './QuestionCard';
 import { OptionGrid } from './OptionGrid';
 import { MultiSelectGrid } from './MultiSelectGrid';
-import { formatBRPhone, cleanPhoneDigits, PhoneSchema } from '../lib/lead';
+import {
+  formatBRPhone,
+  cleanPhoneDigits,
+  PhoneSchema,
+  NO_DATE_VALUE,
+  formatEventDateBR,
+  formatEventDateShortBR,
+  isISODateString,
+} from '../lib/lead';
 import type { JourneyStep } from '../types';
 
 interface DynamicStepRendererProps {
@@ -14,6 +22,8 @@ interface DynamicStepRendererProps {
   accentColor: string;
   isLastStep: boolean;
   variant?: string;
+  /** Datas ocupadas do inquilino (tenant.booking.busyDates), p/ etapas type === 'date'. */
+  busyDates?: string[];
 }
 
 export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
@@ -24,6 +34,7 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
   accentColor,
   isLastStep,
   variant,
+  busyDates,
 }) => {
   const [inputFocused, setInputFocused] = useState(false);
   const [error, setError] = useState('');
@@ -76,7 +87,192 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
     );
   }
 
-  // 3. Phone Input (com máscara BR e validação zod DDD)
+  // 3. Date (agendamento: data do evento + "Ainda sem data"; datas ocupadas bloqueadas)
+  if (stepConfig.type === 'date') {
+    const allBusy = Array.from(
+      new Set([...(busyDates || []), ...(stepConfig.busyDates || [])].filter(isISODateString))
+    ).sort();
+    const busySet = new Set(allBusy);
+    const dateVal = typeof value === 'string' ? value : '';
+    const isUndecided = dateVal === NO_DATE_VALUE;
+    const selectedDate = !isUndecided && isISODateString(dateVal) ? dateVal : '';
+    const isBusy = selectedDate !== '' && busySet.has(selectedDate);
+    const isDateValid = isUndecided || (selectedDate !== '' && !isBusy);
+    const todayISO = new Date().toLocaleDateString('en-CA');
+
+    const handleDateContinue = () => {
+      if (!isDateValid) {
+        setError(
+          isBusy
+            ? 'Esta data já está ocupada. Escolha outra data ou continue sem data definida.'
+            : 'Escolha uma data ou toque em "Ainda sem data".'
+        );
+        return;
+      }
+      setError('');
+      onNext();
+    };
+
+    return (
+      <QuestionCard title={stepConfig.title} subtitle={stepConfig.subtitle} variant={variant}>
+        <div className="flex flex-col gap-4">
+          <div className="relative pt-1">
+            <motion.label
+              htmlFor={`input-${stepConfig.field}`}
+              className="block text-[11px] uppercase tracking-[0.18em] mb-1.5 font-mono"
+              animate={{
+                color: inputFocused
+                  ? accentColor
+                  : isGlass
+                  ? 'rgba(255, 235, 210, 0.65)'
+                  : '#888',
+              }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            >
+              Data do evento
+            </motion.label>
+            <input
+              id={`input-${stepConfig.field}`}
+              type="date"
+              min={todayISO}
+              value={selectedDate}
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
+              onChange={(e) => {
+                onChange(stepConfig.field, e.target.value);
+                if (error) setError('');
+              }}
+              className={`w-full p-4 rounded-xl text-base transition-all focus:outline-none ${
+                isGlass
+                  ? 'bg-[rgba(255,244,230,0.05)] backdrop-blur-[9px] text-[#FFF4E6] border-b-2 border-t-0 border-x-0 rounded-b-none font-glass-sans [color-scheme:dark]'
+                  : 'border border-[#E5E5E1] bg-white text-[#1A1A1A] shadow-2xs'
+              }`}
+              style={{
+                borderColor: isBusy
+                  ? '#FF5252'
+                  : inputFocused
+                  ? accentColor
+                  : isGlass
+                  ? 'rgba(255, 235, 210, 0.25)'
+                  : '#E5E5E1',
+                boxShadow: inputFocused
+                  ? isGlass
+                    ? `0 2px 12px ${accentColor}40`
+                    : `0 0 0 3px ${accentColor}20`
+                  : 'none',
+              }}
+            />
+            {selectedDate && !isBusy && (
+              <p className={`text-xs mt-2 pl-1 font-medium ${isGlass ? 'text-[rgba(255,235,210,0.8)]' : 'text-[#555]'}`}>
+                {formatEventDateBR(selectedDate)}
+              </p>
+            )}
+            {isBusy && (
+              <p id="date-busy-error" className="text-[#FF5252] text-xs mt-2 pl-1 font-medium">
+                Esta data já está ocupada — escolha outra ou continue sem data definida.
+              </p>
+            )}
+            {error && !isBusy && (
+              <p id="date-error" className="text-[#FF5252] text-xs mt-2 pl-1 font-medium">
+                {error}
+              </p>
+            )}
+          </div>
+
+          {allBusy.length > 0 && (
+            <div id="busy-dates-list">
+              <p className={`text-[11px] uppercase tracking-[0.14em] font-mono mb-2 ${isGlass ? 'text-[rgba(255,235,210,0.55)]' : 'text-[#999]'}`}>
+                Datas já ocupadas
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {allBusy.map((d) => (
+                  <span
+                    key={d}
+                    className={`text-[11px] px-2.5 py-1 rounded-full border line-through decoration-1 ${
+                      isGlass
+                        ? 'border-[rgba(255,235,210,0.18)] text-[rgba(255,235,210,0.55)] bg-[rgba(255,244,230,0.04)]'
+                        : 'border-[#E5E5E1] text-[#999] bg-[#F5F5F3]'
+                    }`}
+                  >
+                    {formatEventDateShortBR(d)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <button
+            id="date-no-date-btn"
+            type="button"
+            onClick={() => {
+              onChange(stepConfig.field, NO_DATE_VALUE);
+              if (error) setError('');
+            }}
+            className={`w-full text-left p-4 rounded-xl transition-colors duration-150 cursor-pointer flex items-center justify-between border ${
+              isGlass
+                ? 'backdrop-blur-md'
+                : isUndecided
+                ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                : 'bg-white hover:border-[#1A1A1A] text-[#1A1A1A] border-[#E5E5E1] shadow-xs'
+            }`}
+            style={
+              isGlass
+                ? {
+                    backgroundColor: isUndecided ? 'rgba(228, 3, 46, 0.16)' : 'rgba(214, 178, 120, 0.07)',
+                    borderColor: isUndecided ? accentColor : 'rgba(255, 235, 210, 0.16)',
+                    color: '#FFF4E6',
+                  }
+                : undefined
+            }
+          >
+            <span className={`font-medium text-sm sm:text-base ${isGlass ? 'font-glass-sans' : ''}`}>
+              Ainda sem data
+            </span>
+            <span
+              className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                isUndecided ? 'border-transparent' : isGlass ? 'border-[rgba(255,235,210,0.3)]' : 'border-[#CCC]'
+              }`}
+              style={{ backgroundColor: isUndecided ? accentColor : 'transparent' }}
+            >
+              {isUndecided && (
+                <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 7l4 4 6-6" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </span>
+          </button>
+
+          <motion.button
+            id={`finish-${stepConfig.field}-btn`}
+            type="button"
+            onClick={handleDateContinue}
+            disabled={!isDateValid}
+            animate={{ opacity: isDateValid ? 1 : 0.45, cursor: isDateValid ? 'pointer' : 'not-allowed' }}
+            transition={{ duration: 0.2 }}
+            whileTap={isDateValid ? { scale: 0.97 } : undefined}
+            className="w-full py-4 px-6 rounded-xl font-medium text-base tracking-wide transition-colors duration-150 shadow-sm flex items-center justify-center gap-2 border will-change-transform text-white"
+            style={
+              isGlass
+                ? {
+                    backgroundColor: isDateValid ? 'rgba(255, 244, 230, 0.16)' : 'rgba(255, 244, 230, 0.06)',
+                    borderColor: isDateValid ? 'rgba(255, 235, 210, 0.3)' : 'rgba(255, 235, 210, 0.12)',
+                    backdropFilter: 'blur(12px)',
+                    boxShadow: isDateValid ? `0 4px 20px ${accentColor}40` : undefined,
+                  }
+                : { backgroundColor: accentColor, borderColor: accentColor }
+            }
+          >
+            <span className={isGlass ? 'font-glass-sans' : ''}>
+              {isLastStep ? 'Concluir avaliação' : 'Continuar'}
+            </span>
+            <span aria-hidden="true">→</span>
+          </motion.button>
+        </div>
+      </QuestionCard>
+    );
+  }
+
+  // 4. Phone Input (com máscara BR e validação zod DDD)
   if (stepConfig.type === 'phone') {
     const phoneVal = typeof value === 'string' ? value : '';
 
@@ -190,7 +386,7 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
     );
   }
 
-  // 4. Text / Textarea Input
+  // 5. Text / Textarea Input
   const textVal = typeof value === 'string' ? value : '';
   const isRequired = stepConfig.required !== false;
   const minChars = stepConfig.minChars || (isRequired ? 2 : 0);

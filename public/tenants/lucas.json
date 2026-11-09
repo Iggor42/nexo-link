@@ -1,0 +1,197 @@
+{
+  "accent": "#B91C1C",
+  "concierge": false,
+  "cref": "",
+  "instagram": "lucaspersonal.j",
+  "journey": {
+    "niche": "fitness",
+    "steps": [
+      {
+        "field": "objetivo",
+        "id": "objetivo",
+        "options": [
+          {
+            "description": "Queima de gordura e definição corporal",
+            "id": "emagrecimento",
+            "label": "Emagrecimento"
+          },
+          {
+            "description": "Ganho de massa muscular e força",
+            "id": "hipertrofia",
+            "label": "Hipertrofia"
+          },
+          {
+            "description": "Disposição, bem-estar e longevidade",
+            "id": "saude",
+            "label": "Saúde"
+          },
+          {
+            "description": "Melhora de rendimento e condicionamento",
+            "id": "performance",
+            "label": "Performance"
+          },
+          {
+            "description": "Alívio de dores e correção postural",
+            "id": "reabilitacao",
+            "label": "Reabilitação"
+          },
+          {
+            "description": "Recuperação funcional segura e gradual",
+            "id": "pos-parto",
+            "label": "Pós-parto"
+          }
+        ],
+        "subtitle": "Selecione o foco central do seu novo plano de treino.",
+        "title": "Qual é o seu objetivo principal hoje?",
+        "type": "single"
+      },
+      {
+        "field": "experience",
+        "id": "experience",
+        "options": [
+          {
+            "description": "Começando do zero absoluto",
+            "id": "nunca-treinou",
+            "label": "Nunca treinou"
+          },
+          {
+            "description": "Já treinou antes, mas sem constância",
+            "id": "parado",
+            "label": "Parado no momento"
+          },
+          {
+            "description": "Sem frequência fixa semanal",
+            "id": "as-vezes",
+            "label": "Treina às vezes"
+          },
+          {
+            "description": "Rotina ativa, buscando evolução",
+            "id": "constante",
+            "label": "Constante"
+          }
+        ],
+        "subtitle": "Nos ajuda a calibrar a intensidade e o volume inicial.",
+        "title": "Como está sua rotina de treinos hoje?",
+        "type": "single"
+      },
+      {
+        "field": "restrictions",
+        "id": "restrictions",
+        "options": [
+          {
+            "id": "nenhuma",
+            "label": "Nenhuma"
+          },
+          {
+            "id": "joelho",
+            "label": "Joelho"
+          },
+          {
+            "id": "ombro",
+            "label": "Ombro"
+          },
+          {
+            "id": "coluna",
+            "label": "Coluna"
+          },
+          {
+            "id": "coracao",
+            "label": "Coração"
+          },
+          {
+            "id": "diabetes",
+            "label": "Diabetes"
+          },
+          {
+            "id": "gestante",
+            "label": "Gestante"
+          },
+          {
+            "id": "outra",
+            "label": "Outra"
+          }
+        ],
+        "subtitle": "Marque todas as aplicáveis.",
+        "title": "Você possui alguma dor ou limitação física?",
+        "type": "multi"
+      },
+      {
+        "field": "availability",
+        "id": "availability",
+        "options": [
+          {
+            "id": "2-3x",
+            "label": "2-3x por semana"
+          },
+          {
+            "id": "4-5x",
+            "label": "4-5x por semana"
+          },
+          {
+            "id": "todos-os-dias",
+            "label": "Todos os dias"
+          },
+          {
+            "id": "indefinido",
+            "label": "Indefinido"
+          }
+        ],
+        "subtitle": "Defina sua frequência semanal desejada.",
+        "title": "Quantos dias por semana você quer treinar?",
+        "type": "single"
+      },
+      {
+        "field": "modality",
+        "id": "modality",
+        "options": [
+          {
+            "id": "presencial",
+            "label": "Presencial"
+          },
+          {
+            "id": "online",
+            "label": "Online"
+          },
+          {
+            "id": "tanto-faz",
+            "label": "Tanto faz"
+          }
+        ],
+        "subtitle": "Defina o modelo de acompanhamento.",
+        "title": "Qual modalidade de treino você prefere?",
+        "type": "single"
+      },
+      {
+        "field": "difficulty",
+        "id": "difficulty",
+        "placeholder": "Ex.: constância, falta de tempo, não sei montar meu treino...",
+        "required": false,
+        "subtitle": "Campo opcional. Conte em poucas palavras o que mais tem impedido sua evolução.",
+        "title": "Qual a sua maior dificuldade para treinar hoje?",
+        "type": "text"
+      },
+      {
+        "field": "name",
+        "id": "name",
+        "minChars": 2,
+        "placeholder": "Seu nome",
+        "required": true,
+        "subtitle": "Informe seu nome para que seu atendimento seja personalizado.",
+        "title": "Como podemos te chamar?",
+        "type": "text"
+      }
+    ]
+  },
+  "name": "Lucas Personal",
+  "photo": "/assets/lucas.jpg",
+  "slug": "lucas",
+  "socialProof": "",
+  "specialties": [
+    "Emagrecimento",
+    "Hipertrofia",
+    "Performance"
+  ],
+  "tagline": "Emagrecimento, hipertrofia e performance — online e presencial.",
+  "whatsapp": "5538991909079",
+  "whatsappTemplate": "Olá! Meu nome é {name}. Quero começar a treinar — avaliação inicial: objetivo: {objetivo}; nível atual: {experience}; limitações: {restrictions}; frequência: {availability}; modalidade: {modality}. Maior dificuldade: {difficulty}."
+}

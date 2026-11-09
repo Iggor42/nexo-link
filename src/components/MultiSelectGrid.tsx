@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import type { OptionItem } from '../config/questions';
+import type { JourneyStepOption } from '../types';
 
 interface MultiSelectGridProps {
-  options: OptionItem[];
+  options: JourneyStepOption[];
   selectedIds: string[];
   onChange: (ids: string[]) => void;
   onContinue: () => void;

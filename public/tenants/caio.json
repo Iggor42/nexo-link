@@ -1,0 +1,219 @@
+{
+  "booking": {
+    "busyDates": []
+  },
+  "city": "Montes Claros/MG",
+  "concierge": false,
+  "footer": {
+    "lines": [
+      "@caiooliveirabarman",
+      "Coquetelaria para eventos · Montes Claros/MG"
+    ]
+  },
+  "instagram": "caiooliveirabarman",
+  "journey": {
+    "niche": "eventos",
+    "steps": [
+      {
+        "field": "goal",
+        "id": "goal",
+        "options": [
+          {
+            "id": "casamento",
+            "label": "Casamento"
+          },
+          {
+            "id": "aniversario",
+            "label": "Aniversário ou festa"
+          },
+          {
+            "id": "corporativo",
+            "label": "Corporativo"
+          },
+          {
+            "id": "formatura",
+            "label": "Formatura"
+          },
+          {
+            "id": "outro",
+            "label": "Outro"
+          }
+        ],
+        "subtitle": "Isso define o formato base do serviço",
+        "title": "Qual é o tipo do seu evento?",
+        "type": "single"
+      },
+      {
+        "field": "eventDate",
+        "id": "eventDate",
+        "subtitle": "Escolha o dia do evento ou continue sem data definida — datas ocupadas aparecem marcadas",
+        "title": "Qual a data do evento?",
+        "type": "date"
+      },
+      {
+        "field": "availability",
+        "id": "availability",
+        "options": [
+          {
+            "id": "30d",
+            "label": "Próximos 30 dias"
+          },
+          {
+            "id": "1a3m",
+            "label": "Em 1 a 3 meses"
+          },
+          {
+            "id": "3a6m",
+            "label": "Em 3 a 6 meses"
+          },
+          {
+            "id": "semdata",
+            "label": "Ainda sem data"
+          }
+        ],
+        "subtitle": "Para conferir a agenda do Caio",
+        "title": "Quando será o evento?",
+        "type": "single"
+      },
+      {
+        "field": "experience",
+        "id": "experience",
+        "options": [
+          {
+            "id": "ate50",
+            "label": "Até 50"
+          },
+          {
+            "id": "50a100",
+            "label": "50 a 100"
+          },
+          {
+            "id": "100a200",
+            "label": "100 a 200"
+          },
+          {
+            "id": "200mais",
+            "label": "Mais de 200"
+          }
+        ],
+        "subtitle": "Dimensiona equipe e volume de bebidas",
+        "title": "Quantos convidados você espera?",
+        "type": "single"
+      },
+      {
+        "field": "modality",
+        "id": "modality",
+        "options": [
+          {
+            "id": "openbar",
+            "label": "Open bar"
+          },
+          {
+            "id": "autorais",
+            "label": "Drinks autorais"
+          },
+          {
+            "id": "experiencia",
+            "label": "Experiência de coquetelaria"
+          },
+          {
+            "id": "completo",
+            "label": "Serviço completo com equipe"
+          },
+          {
+            "id": "naosei",
+            "label": "Ainda não sei"
+          }
+        ],
+        "subtitle": "O Caio monta a proposta a partir daqui",
+        "title": "Qual estilo de serviço combina com seu evento?",
+        "type": "single"
+      },
+      {
+        "field": "restrictions",
+        "id": "restrictions",
+        "options": [
+          {
+            "id": "mocktails",
+            "label": "Opções sem álcool (mocktails)"
+          },
+          {
+            "id": "espaco",
+            "label": "Espaço com restrições"
+          },
+          {
+            "id": "tematico",
+            "label": "Menu temático"
+          },
+          {
+            "id": "nenhum",
+            "label": "Nenhum"
+          }
+        ],
+        "subtitle": "Selecione todos que se aplicam",
+        "title": "Algum pedido especial?",
+        "type": "multi"
+      },
+      {
+        "field": "difficulty",
+        "id": "difficulty",
+        "options": [
+          {
+            "id": "quantidade",
+            "label": "Calcular quantidade de bebida"
+          },
+          {
+            "id": "menu",
+            "label": "Escolher o menu"
+          },
+          {
+            "id": "custo",
+            "label": "Fechar o custo"
+          },
+          {
+            "id": "estrutura",
+            "label": "Estruturar o serviço"
+          },
+          {
+            "id": "soorcamento",
+            "label": "Só quero um orçamento"
+          }
+        ],
+        "subtitle": "O Nexo começa a conversa por aqui",
+        "title": "Qual sua maior dificuldade hoje?",
+        "type": "single"
+      },
+      {
+        "field": "name",
+        "id": "name",
+        "minChars": 2,
+        "placeholder": "Seu nome",
+        "required": true,
+        "subtitle": "Para o atendimento ser personalizado",
+        "title": "Qual é o seu nome?",
+        "type": "text"
+      },
+      {
+        "field": "phone",
+        "id": "phone",
+        "placeholder": "(38) 99999-9999",
+        "required": true,
+        "subtitle": "O Nexo, concierge digital do Caio, te chama em seguida",
+        "title": "Qual seu número de WhatsApp com DDD?",
+        "type": "phone"
+      }
+    ]
+  },
+  "name": "Caio Oliveira",
+  "photo": "/assets/caio-perfil.webp",
+  "profession": "Barman & Coquetelaria Premium para Eventos",
+  "since": 2008,
+  "slug": "caio",
+  "theme": {
+    "accent": "#E4032E",
+    "backgroundImage": "/assets/caio-bg.webp",
+    "variant": "glass"
+  },
+  "whatsapp": "5538991114636",
+  "whatsappTemplate": "Olá, {tenant}! Sou {name}. Montei meu pedido pelo link — evento: {goal}; data do evento: {eventDate}; janela: {availability}; convidados: {experience}; estilo: {modality}. Pedidos especiais: {restrictions}. Maior dificuldade: {difficulty}. Pode me passar um orçamento?"
+}

@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 interface WhatsAppCTAProps {
-  personalName: string;
+  tenantName: string;
   whatsappUrl: string;
   accentColor?: string;
   variant?: string;
 }
 
 export const WhatsAppCTA: React.FC<WhatsAppCTAProps> = ({
-  personalName,
+  tenantName,
   whatsappUrl,
   accentColor = '#B91C1C',
   variant,
@@ -76,7 +76,7 @@ export const WhatsAppCTA: React.FC<WhatsAppCTAProps> = ({
         }
       >
         <span className={isGlass ? 'font-glass-sans' : ''}>
-          Falar com {personalName} no WhatsApp
+          Falar com {tenantName} no WhatsApp
         </span>
         <span aria-hidden="true" className="text-base">↗</span>
       </motion.a>

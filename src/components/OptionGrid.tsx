@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import type { OptionItem } from '../config/questions';
+import type { JourneyStepOption } from '../types';
 
 interface OptionGridProps {
-  options: OptionItem[];
+  options: JourneyStepOption[];
   selectedId?: string;
   onSelect: (id: string) => void;
   accentColor?: string;

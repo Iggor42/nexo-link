@@ -1,8 +1,1 @@
-{
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
-}
+{"functions":{"api/lead.ts":{"includeFiles":"public/tenants/*.json"}},"redirects":[{"destination":"/lucas","permanent":true,"source":"/p/lucaspersonal"},{"destination":"/caio","permanent":true,"source":"/p/caiooliveira"},{"destination":"/lucas","permanent":true,"source":"/lucaspersonal"},{"destination":"/caio","permanent":true,"source":"/caiooliveira"},{"destination":"/:slug","permanent":true,"source":"/p/:slug"}],"rewrites":[{"destination":"/index.html","source":"/(.*)"}]}

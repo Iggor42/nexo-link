@@ -5,9 +5,9 @@ import path from 'path';
 import { defineConfig, Plugin } from 'vite';
 
 function dynamicMetaPlugin(): Plugin {
-  function getPersonalData(slug: string) {
+  function getTenantData(slug: string) {
     try {
-      const jsonPath = path.resolve(process.cwd(), 'public', 'personals', `${slug}.json`);
+      const jsonPath = path.resolve(process.cwd(), 'public', 'tenants', `${slug}.json`);
       if (!fs.existsSync(jsonPath)) return null;
       const raw = fs.readFileSync(jsonPath, 'utf-8');
       const clean = raw.replace(/^\s*\/\/.*$/gm, '');
@@ -79,7 +79,7 @@ function dynamicMetaPlugin(): Plugin {
         if (!match) return next();
 
         const slug = match[1];
-        const data = getPersonalData(slug);
+        const data = getTenantData(slug);
         if (!data) return next();
 
         const indexPath = path.resolve(process.cwd(), 'index.html');
@@ -106,7 +106,7 @@ function dynamicMetaPlugin(): Plugin {
       const match = cleanUrl.match(/(?:^\/p\/|^\/)([a-zA-Z0-9_-]+)$/);
       if (match) {
         const slug = match[1];
-        const data = getPersonalData(slug);
+        const data = getTenantData(slug);
         if (data) {
           const host = (ctx as any).req?.headers?.host || '';
           const origin = host ? `https://${host}` : '';
@@ -121,16 +121,22 @@ function dynamicMetaPlugin(): Plugin {
         const indexHtmlPath = path.join(distDir, 'index.html');
         if (!fs.existsSync(indexHtmlPath)) return;
         const baseHtml = fs.readFileSync(indexHtmlPath, 'utf-8');
-        const personalsDir = path.resolve(process.cwd(), 'public', 'personals');
-        if (!fs.existsSync(personalsDir)) return;
-        const files = fs.readdirSync(personalsDir).filter((f) => f.endsWith('.json'));
+        const tenantsDir = path.resolve(process.cwd(), 'public', 'tenants');
+        if (!fs.existsSync(tenantsDir)) return;
+        const files = fs.readdirSync(tenantsDir).filter((f) => f.endsWith('.json'));
+
+        // Origem absoluta para og:image (WhatsApp exige URL absoluta).
+        // Em produção usa SITE_URL; fallback para o domínio de produção.
+        const siteUrl = (
+          process.env.SITE_URL || 'https://nexo-link.vercel.app'
+        ).replace(/\/$/, '');
 
         for (const file of files) {
           const slug = file.replace('.json', '');
-          const data = getPersonalData(slug);
+          const data = getTenantData(slug);
           if (!data) continue;
 
-          const transformed = injectMeta(baseHtml, data);
+          const transformed = injectMeta(baseHtml, data, siteUrl);
 
           // 1. dist/p/:slug/index.html
           const pDir = path.join(distDir, 'p', slug);
@@ -143,7 +149,7 @@ function dynamicMetaPlugin(): Plugin {
           fs.writeFileSync(path.join(directDir, 'index.html'), transformed, 'utf-8');
         }
       } catch (err) {
-        console.error('[vite-plugin-dynamic-meta] Error generating static personals HTML:', err);
+        console.error('[vite-plugin-dynamic-meta] Error generating static tenants HTML:', err);
       }
     },
   };

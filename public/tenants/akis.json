@@ -1,0 +1,160 @@
+{
+  "slug": "akis",
+  "name": "Akis",
+  "profession": "Barbearia | Loja Masculina",
+  "city": "Montes Claros/MG",
+  "address": "Rua Padre Vieira, nº 448",
+  "neighborhood": "São Judas",
+  "tagline": "Cuidando do seu estilo em cada detalhe",
+  "photo": "/assets/akis-fachada.webp",
+  "whatsapp": "5538998929279",
+  "phoneFormatted": "(38) 9 9892-9279",
+  "instagram": "akisbarbearia_",
+  "instagramSecondary": "akisformen_",
+  "mapUrl": "https://www.google.com/maps/search/?api=1&query=Rua+Padre+Vieira+448+Sao+Judas+Montes+Claros+MG",
+  "theme": {
+    "accent": "#E5E7EB",
+    "variant": "barber",
+    "mode": "dark",
+    "backgroundImage": "/assets/akis-fachada.webp"
+  },
+  "footer": {
+    "lines": [
+      "AKIS · Barbearia | Loja Masculina",
+      "Rua Padre Vieira, nº 448 · São Judas · Montes Claros/MG",
+      "Contato: (38) 9 9892-9279"
+    ]
+  },
+  "twoDirections": true,
+  "barberServices": [
+    {
+      "id": "corte",
+      "name": "Corte",
+      "price": 30,
+      "formattedPrice": "R$ 30",
+      "popular": true,
+      "description": "Corte tradicional ou degradê com acabamento impecável."
+    },
+    {
+      "id": "barba",
+      "name": "Barba",
+      "price": 20,
+      "formattedPrice": "R$ 20",
+      "description": "Desenho, alinhamento, toalha quente e pós-barba."
+    },
+    {
+      "id": "barboterapia",
+      "name": "Barboterapia",
+      "price": 35,
+      "formattedPrice": "R$ 35"
+    },
+    {
+      "id": "pezinho",
+      "name": "Pezinho",
+      "price": 12,
+      "formattedPrice": "R$ 12",
+      "description": "Acabamento no contorno, nuca e costeletas na navalha."
+    },
+    {
+      "id": "corte_barba",
+      "name": "Corte + Barba",
+      "price": 50,
+      "formattedPrice": "R$ 50",
+      "popular": true,
+      "badge": "Mais Pedido",
+      "description": "Combo completo de cabelo alinhado e barba modelada."
+    },
+    {
+      "id": "sobrancelha",
+      "name": "Sobrancelha",
+      "price": 7,
+      "formattedPrice": "R$ 7"
+    },
+    {
+      "id": "sobrancelha_pinca",
+      "name": "Sobrancelha na Pinça",
+      "price": 10,
+      "formattedPrice": "R$ 10"
+    },
+    {
+      "id": "luzes",
+      "name": "Luzes",
+      "price": 90,
+      "formattedPrice": "R$ 90"
+    },
+    {
+      "id": "platinado",
+      "name": "Platinado",
+      "price": 100,
+      "formattedPrice": "R$ 100"
+    },
+    {
+      "id": "limpeza_nasal",
+      "name": "Limpeza Nasal",
+      "price": 10,
+      "formattedPrice": "R$ 10"
+    },
+    {
+      "id": "limpeza_pele",
+      "name": "Limpeza de Pele",
+      "price": 20,
+      "formattedPrice": "R$ 20"
+    },
+    {
+      "id": "relaxamento",
+      "name": "Relaxamento",
+      "price": 20,
+      "formattedPrice": "R$ 20"
+    },
+    {
+      "id": "progressiva",
+      "name": "Progressiva",
+      "price": 80,
+      "formattedPrice": "R$ 80"
+    },
+    {
+      "id": "corte_visagismo",
+      "name": "Corte Visagismo",
+      "price": 80,
+      "formattedPrice": "R$ 80"
+    }
+  ],
+  "storeCategories": [
+    {
+      "id": "camisetas",
+      "name": "Camisetas & Estilo Urbano",
+      "icon": "shirt",
+      "description": "Camisetas oversized, estampas exclusivas e streetwear."
+    },
+    {
+      "id": "bones",
+      "name": "Bonés & Acessórios",
+      "icon": "cap",
+      "description": "Bonés snapback, trucker e acessórios masculinos de presença."
+    },
+    {
+      "id": "bermudas",
+      "name": "Bermudas, Shorts & Calças",
+      "icon": "pants",
+      "description": "Jeans, sarja e modelos casuais com caimento sob medida."
+    },
+    {
+      "id": "camisas",
+      "name": "Camisas & Polos",
+      "icon": "polo",
+      "description": "Peças alinhadas para ocasiões especiais ou rolê noturno."
+    },
+    {
+      "id": "novidades",
+      "name": "Novidades & Lançamentos",
+      "icon": "sparkles",
+      "description": "Veja as novas chegadas em estoque na loja física."
+    },
+    {
+      "id": "look_completo",
+      "name": "Look Completo / Consultoria",
+      "icon": "user-check",
+      "description": "Atendimento direto com consultor para montar seu visual."
+    }
+  ]
+}
