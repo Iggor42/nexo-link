@@ -62,6 +62,31 @@ vazio — ele preenche as datas ocupadas reais quando tiver a lista.
   **somente se o array tiver itens**. Vazio/ausente = seção oculta.
 - Nunca inventar depoimento em inquilino real — coletar com autorização.
 
+## 4. Jornadas condicionais — steps com `when` (dois direcionamentos)
+
+Um step pode depender da resposta de outro campo:
+
+```json
+{ "id": "services", "field": "services", "type": "multi",
+  "title": "Escolha seus serviços",
+  "when": { "field": "direction", "equals": "barber" } }
+```
+
+- Só os steps visíveis entram na contagem ("Passo X de N"), na
+  navegação, no resumo final e na mensagem de WhatsApp. Trocar a
+  resposta que controla o `when` descarta as respostas dos steps que
+  somem — nada vaza para o resumo nem para o WhatsApp.
+- Campos de apoio na jornada: `heroSteps` (nº de passos exibido no
+  hero quando o total varia por direção), `dateLabel` (rótulo acima
+  do input de data; padrão: "Data do evento") e `lastStepCta`
+  (texto do botão no último step; padrão: "Concluir avaliação").
+- Texto do botão principal do hero: `heroCta` no JSON do tenant
+  (padrão: conforme o nicho).
+- **Akis (09/11/2026):** primeiro inquilino condicional — a barbearia
+  e a loja usam a mesma estrutura do Caio (hero → passos → resumo),
+  com a identidade monocromática da Akis. O componente próprio
+  `AkisExperience` (dark luxury) foi removido.
+
 ## Fixture de teste: `/exemplo`
 
 `public/tenants/exemplo.json` é um inquilino **fictício, claramente

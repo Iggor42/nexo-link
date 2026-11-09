@@ -17,6 +17,16 @@ export interface JourneyStep {
   required?: boolean;
   minChars?: number;
   /**
+   * Condicional: o step só aparece quando a resposta de `field` for
+   * igual a `equals` (ou estiver na lista). Sem `when`, sempre visível.
+   * Ex.: serviços da barbearia só quando direction === 'barber'.
+   */
+  when?: { field: string; equals: string | string[] };
+  /** Somente para type === 'date': rótulo acima do input (padrão: "Data do evento"). */
+  dateLabel?: string;
+  /** Texto do botão quando este é o último step (padrão: "Concluir avaliação"). */
+  lastStepCta?: string;
+  /**
    * Somente para type === 'date': datas ocupadas (ISO yyyy-mm-dd) desta
    * etapa. É somado às datas de `Tenant.booking.busyDates`.
    */
@@ -26,25 +36,6 @@ export interface JourneyStep {
 /** Agendamento: datas ocupadas do inquilino (marcação manual, sem Google Calendar). */
 export interface TenantBooking {
   busyDates?: string[];
-}
-
-/** Servico da tabela da barbearia (tenant variant === 'barber'). */
-export interface BarberService {
-  id: string;
-  name: string;
-  price: number;
-  formattedPrice: string;
-  popular?: boolean;
-  badge?: string;
-  description?: string;
-}
-
-/** Categoria da loja masculina (tenant variant === 'barber'). */
-export interface StoreCategory {
-  id: string;
-  name: string;
-  icon?: string;
-  description?: string;
 }
 
 /** Sinal via Pix exibido na tela final. Sem gateway: só chave + valor p/ copiar. */
@@ -75,6 +66,12 @@ export interface TenantFooter {
 
 export interface TenantJourney {
   niche?: string;
+  /**
+   * Nº de passos exibido no hero ("N passos rápidos"). Sem ele, usa o
+   * total de steps da jornada. Útil em jornadas condicionais, onde o
+   * total varia conforme a direção escolhida (ex.: Akis: 7 na barbearia).
+   */
+  heroSteps?: number;
   steps: JourneyStep[];
 }
 
@@ -87,6 +84,8 @@ export interface Tenant {
   cref?: string;
   tagline?: string;
   specialties?: string[];
+  /** Texto do botão principal do hero (padrão: conforme o nicho). */
+  heroCta?: string;
   whatsapp: string;
   instagram?: string;
   photo: string;
@@ -104,15 +103,6 @@ export interface Tenant {
   /** Prova social: carrossel só aparece se o array tiver itens. */
   testimonials?: Testimonial[];
   footer?: TenantFooter;
-  /** Barbearia | Loja Masculina (variant === 'barber'): dois direcionamentos. */
-  address?: string;
-  neighborhood?: string;
-  phoneFormatted?: string;
-  instagramSecondary?: string;
-  mapUrl?: string;
-  twoDirections?: boolean;
-  barberServices?: BarberService[];
-  storeCategories?: StoreCategory[];
   /**
    * Template da mensagem de fallback wa.me. Placeholders:
    * {name} = nome do lead, {tenant} = primeiro nome do tenant,

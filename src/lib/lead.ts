@@ -192,7 +192,7 @@ export function buildDynamicWhatsAppMessage(
       .replace(/[ \t]{2,}/g, ' ')
       .trim();
   } else {
-    const lines: string[] = [`Olá! Meu nome é ${name}.`, '', 'Avaliação inicial:'];
+    const lines: string[] = [`Olá! Meu nome é ${name}.`, '', 'Resumo da solicitação:'];
 
     for (const step of steps) {
       if (step.field === 'name' || step.field === 'phone') continue;

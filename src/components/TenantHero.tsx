@@ -243,9 +243,10 @@ export const TenantHero: React.FC<TenantHeroProps> = ({ tenant, onStart, totalSt
         }`}
       >
         <span className={isGlass ? 'font-glass-sans' : ''}>
-          {tenant.journey?.niche === 'eventos'
-            ? 'Solicitar orçamento tenantizado'
-            : 'Fazer minha avaliação gratuita'}
+          {tenant.heroCta ||
+            (tenant.journey?.niche === 'eventos'
+              ? 'Solicitar orçamento tenantizado'
+              : 'Fazer minha avaliação gratuita')}
         </span>
         <span aria-hidden="true" className="text-base">↗</span>
       </motion.button>

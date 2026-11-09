@@ -129,7 +129,7 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
               }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             >
-              Data do evento
+              {stepConfig.dateLabel || 'Data do evento'}
             </motion.label>
             <input
               id={`input-${stepConfig.field}`}
@@ -263,7 +263,7 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
             }
           >
             <span className={isGlass ? 'font-glass-sans' : ''}>
-              {isLastStep ? 'Concluir avaliação' : 'Continuar'}
+              {isLastStep ? (stepConfig.lastStepCta || 'Concluir avaliação') : 'Continuar'}
             </span>
             <span aria-hidden="true">→</span>
           </motion.button>
@@ -377,7 +377,7 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
             }
           >
             <span className={isGlass ? 'font-glass-sans' : ''}>
-              {isLastStep ? 'Concluir avaliação' : 'Continuar'}
+              {isLastStep ? (stepConfig.lastStepCta || 'Concluir avaliação') : 'Continuar'}
             </span>
             <span aria-hidden="true">→</span>
           </motion.button>
@@ -523,7 +523,7 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
         >
           <span className={isGlass ? 'font-glass-sans' : ''}>
             {isLastStep
-              ? 'Concluir avaliação'
+              ? (stepConfig.lastStepCta || 'Concluir avaliação')
               : !isRequired && textVal.trim().length === 0
               ? 'Pular este passo'
               : 'Continuar'}

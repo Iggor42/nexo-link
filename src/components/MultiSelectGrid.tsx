@@ -91,13 +91,28 @@ export const MultiSelectGrid: React.FC<MultiSelectGridProps> = ({
                     }
               }
             >
-              <span
-                className={`font-medium text-xs sm:text-sm leading-tight ${
-                  isGlass ? 'font-glass-sans' : ''
-                }`}
-              >
-                {opt.label}
-              </span>
+              <div className="flex flex-col pr-2 min-w-0">
+                <span
+                  className={`font-medium text-xs sm:text-sm leading-tight ${
+                    isGlass ? 'font-glass-sans' : ''
+                  }`}
+                >
+                  {opt.label}
+                </span>
+                {opt.description && (
+                  <span
+                    className={`text-[11px] mt-0.5 leading-tight ${
+                      isGlass
+                        ? 'text-[rgba(255,235,210,0.65)] font-glass-sans'
+                        : isSelected
+                        ? 'text-[#CCC]'
+                        : 'text-[#777]'
+                    }`}
+                  >
+                    {opt.description}
+                  </span>
+                )}
+              </div>
 
               <div
                 className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 ml-2 transition-colors ${

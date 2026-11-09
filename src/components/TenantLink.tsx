@@ -18,7 +18,6 @@ import { PixBlock } from './PixBlock';
 import { Testimonials } from './Testimonials';
 import { NotFoundTenant } from './NotFoundTenant';
 import { BackgroundLayers } from './BackgroundLayers';
-import { AkisExperience } from './AkisExperience';
 import type { UTMParams, ConciergeWebhookPayload, JourneyStep } from '../types';
 
 export const TenantLink: React.FC = () => {
@@ -46,10 +45,29 @@ export const TenantLink: React.FC = () => {
   }, [tenant]);
   const hasJourney = dynamicSteps.length > 0;
 
+  // Steps condicionais: um step com `when` só aparece quando a resposta
+  // de outro campo for igual ao valor esperado (ex.: serviços da
+  // barbearia só quando direction === 'barber'). Sem `when`, sempre visível.
+  const isStepVisible = (step: JourneyStep, answers: Record<string, unknown>): boolean => {
+    if (!step.when) return true;
+    const v = answers[step.when.field];
+    const eq = step.when.equals;
+    return Array.isArray(eq) ? eq.includes(v as string) : v === eq;
+  };
+
+  // Respostas da jornada dinâmica (field -> valor)
+  const [dynamicAnswers, setDynamicAnswers] = useState<Record<string, unknown>>({});
+
+  // Só os steps visíveis entram na contagem, na navegação, no resumo e
+  // na mensagem de WhatsApp — o resto nem existe para o lead.
+  const visibleSteps: JourneyStep[] = useMemo(() => {
+    return dynamicSteps.filter((s) => isStepVisible(s, dynamicAnswers));
+  }, [dynamicSteps, dynamicAnswers]);
+
   // Step 0 = Hero/Abertura
   // Steps 1..totalSteps = Perguntas da jornada
   // Step finalStep = Tela final
-  const totalSteps = dynamicSteps.length;
+  const totalSteps = visibleSteps.length;
   const finalStep = totalSteps + 1;
   const [step, setStep] = useState<number>(0);
   const [direction, setDirection] = useState<number>(1);
@@ -59,11 +77,27 @@ export const TenantLink: React.FC = () => {
     setStep(nextStep);
   };
 
-  // Respostas da jornada dinâmica (field -> valor)
-  const [dynamicAnswers, setDynamicAnswers] = useState<Record<string, unknown>>({});
+  // Se a troca de uma resposta esconder steps à frente (ex.: mudar de
+  // barbearia para loja no passo 1), o passo atual não pode ficar além
+  // do fim da jornada visível.
+  useEffect(() => {
+    if (step > finalStep) {
+      setStep(finalStep);
+    }
+  }, [step, finalStep]);
 
   const handleDynamicChange = (field: string, val: unknown) => {
-    setDynamicAnswers((prev) => ({ ...prev, [field]: val }));
+    setDynamicAnswers((prev) => {
+      const next = { ...prev, [field]: val };
+      // Descarta respostas de steps que deixaram de ser visíveis, para
+      // não vazar dado velho no resumo nem na mensagem de WhatsApp.
+      for (const s of dynamicSteps) {
+        if (s.field !== field && !isStepVisible(s, next)) {
+          delete next[s.field];
+        }
+      }
+      return next;
+    });
   };
 
   // Concierge Form & Webhook State
@@ -115,14 +149,14 @@ export const TenantLink: React.FC = () => {
   const whatsappUrl = useMemo(() => {
     if (!tenant) return '';
     const message = buildDynamicWhatsAppMessage(
-      dynamicSteps,
+      visibleSteps,
       dynamicAnswers,
       utms,
       tenant.whatsappTemplate,
       tenant.name
     );
     return buildWhatsAppUrl(tenant.whatsapp, message);
-  }, [tenant, dynamicSteps, dynamicAnswers, utms]);
+  }, [tenant, visibleSteps, dynamicAnswers, utms]);
 
   if (loading) {
     return (
@@ -140,20 +174,6 @@ export const TenantLink: React.FC = () => {
 
   if (notFound || !tenant) {
     return <NotFoundTenant />;
-  }
-
-  // Akis Barbearia | Loja Masculina — experiencia propria (dois direcionamentos:
-  // agendamento na barbearia + atendimento na loja). Nao usa a jornada padrao.
-  if (tenant.theme?.variant === 'barber' || tenant.twoDirections || tenant.slug === 'akis') {
-    return (
-      <div
-        id="tenant-link-page"
-        className="min-h-screen w-full flex items-center justify-center p-3 sm:p-6 md:p-8 relative bg-[#090909] text-white font-sans"
-      >
-        <BackgroundLayers accentColor={accent} variant="barber" backgroundImage={backgroundImage} />
-        <AkisExperience tenant={tenant} utms={utms} />
-      </div>
-    );
   }
 
   // Step 3D Transition Variants
@@ -260,7 +280,7 @@ export const TenantLink: React.FC = () => {
                 <TenantHero
                   tenant={tenant}
                   onStart={() => goToStep(1)}
-                  totalSteps={totalSteps}
+                  totalSteps={tenant.journey?.heroSteps || totalSteps}
                 />
                 {/* Prova social: só renderiza se tenant.testimonials tiver itens */}
                 <Testimonials
@@ -292,8 +312,8 @@ export const TenantLink: React.FC = () => {
                 />
 
                 <DynamicStepRenderer
-                  stepConfig={dynamicSteps[step - 1]}
-                  value={dynamicAnswers[dynamicSteps[step - 1].field]}
+                  stepConfig={visibleSteps[step - 1]}
+                  value={dynamicAnswers[visibleSteps[step - 1].field]}
                   onChange={handleDynamicChange}
                   onNext={() => goToStep(step + 1)}
                   accentColor={accent}
@@ -481,14 +501,14 @@ export const TenantLink: React.FC = () => {
                       </div>
                     )}
 
-                    {dynamicSteps
+                    {visibleSteps
                       .filter((st) => st.field !== 'name' && st.field !== 'phone')
                       .map((st) => {
                         const val = dynamicAnswers[st.field];
                         if (val === undefined || val === null || val === '') return null;
                         if (Array.isArray(val) && val.length === 0) return null;
                         // getStepDisplay resolve single/multi e formata type=date em pt-BR
-                        const display = getStepDisplay(dynamicSteps, dynamicAnswers, st.field);
+                        const display = getStepDisplay(visibleSteps, dynamicAnswers, st.field);
                         if (!display) return null;
 
                         return (
