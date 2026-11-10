@@ -11,6 +11,7 @@ import {
   sendConciergeViaProxy,
 } from '../lib/lead';
 import { TenantHero } from './TenantHero';
+import { HubHero } from './HubHero';
 import { ProgressBar } from './ProgressBar';
 import { DynamicStepRenderer } from './DynamicStepRenderer';
 import { WhatsAppCTA } from './WhatsAppCTA';
@@ -18,6 +19,7 @@ import { PixBlock } from './PixBlock';
 import { Testimonials } from './Testimonials';
 import { NotFoundTenant } from './NotFoundTenant';
 import { BackgroundLayers } from './BackgroundLayers';
+import { getAvailableSlots, scheduleSummary } from '../lib/booking';
 import type { UTMParams, ConciergeWebhookPayload, JourneyStep } from '../types';
 
 export const TenantLink: React.FC = () => {
@@ -64,10 +66,21 @@ export const TenantLink: React.FC = () => {
     return dynamicSteps.filter((s) => isStepVisible(s, dynamicAnswers));
   }, [dynamicSteps, dynamicAnswers]);
 
-  // Step 0 = Hero/Abertura
+  // Hub (tela inicial com acessos): a direção já foi escolhida ali, então
+  // o step de direção (skipIfAnswered) some da navegação — mas a resposta
+  // continua no resumo e no WhatsApp (que usam dynamicSteps).
+  const navSteps: JourneyStep[] = useMemo(() => {
+    return visibleSteps.filter(
+      (s) => !(s.skipIfAnswered && dynamicAnswers[s.field] !== undefined)
+    );
+  }, [visibleSteps, dynamicAnswers]);
+
+  const hasHub = Boolean(tenant?.journey?.heroAccesses?.length);
+
+  // Step 0 = Hero/Abertura (ou Hub)
   // Steps 1..totalSteps = Perguntas da jornada
   // Step finalStep = Tela final
-  const totalSteps = visibleSteps.length;
+  const totalSteps = navSteps.length;
   const finalStep = totalSteps + 1;
   const [step, setStep] = useState<number>(0);
   const [direction, setDirection] = useState<number>(1);
@@ -95,9 +108,22 @@ export const TenantLink: React.FC = () => {
         if (s.field !== field && !isStepVisible(s, next)) {
           delete next[s.field];
         }
+        // E de steps que dependem deste campo (ex.: horário depende da data).
+        if (s.dependsOn === field && s.field !== field) {
+          delete next[s.field];
+        }
       }
       return next;
     });
+  };
+
+  // Acesso do hub: grava a direção e abre o 1º passo da jornada.
+  const handleHubAccess = (value: string) => {
+    const directionStep = dynamicSteps.find((s) => s.field === 'direction');
+    if (directionStep) {
+      handleDynamicChange('direction', value);
+    }
+    goToStep(1);
   };
 
   // Concierge Form & Webhook State
@@ -146,17 +172,42 @@ export const TenantLink: React.FC = () => {
   };
 
   // Build qualified WhatsApp payload (template do tenant ou resumo genérico)
+  // Usa dynamicSteps (não visibleSteps): steps respondidos no hub, como a
+  // direção, continuam no resumo e na mensagem mesmo fora da navegação.
   const whatsappUrl = useMemo(() => {
     if (!tenant) return '';
     const message = buildDynamicWhatsAppMessage(
-      visibleSteps,
+      dynamicSteps,
       dynamicAnswers,
       utms,
       tenant.whatsappTemplate,
       tenant.name
     );
     return buildWhatsAppUrl(tenant.whatsapp, message);
-  }, [tenant, visibleSteps, dynamicAnswers, utms]);
+  }, [tenant, dynamicSteps, dynamicAnswers, utms]);
+
+  // Step atual resolvido: etapa de horários gera as opções a partir da
+  // grade do gestor + da data escolhida (só horários livres aparecem).
+  // (Hooks antes dos early returns abaixo.)
+  const resolvedStepConfig: JourneyStep | undefined = useMemo(() => {
+    const currentStepConfig = navSteps[step - 1];
+    if (!currentStepConfig) return undefined;
+    if (currentStepConfig.optionsSource !== 'bookingSlots') return currentStepConfig;
+    const dateField = currentStepConfig.dependsOn || 'barberDate';
+    const dateVal = dynamicAnswers[dateField];
+    const slots = typeof dateVal === 'string'
+      ? getAvailableSlots(tenant?.booking, dateVal)
+      : [];
+    return {
+      ...currentStepConfig,
+      options: slots.map((t) => ({ id: t, label: t })),
+    };
+  }, [navSteps, step, dynamicAnswers, tenant]);
+
+  const hubServices = useMemo(() => {
+    const servicesStep = dynamicSteps.find((s) => s.field === 'services');
+    return servicesStep?.options || [];
+  }, [dynamicSteps]);
 
   if (loading) {
     return (
@@ -185,6 +236,9 @@ export const TenantLink: React.FC = () => {
   const progressTotal = hasUnresolvedCondition
     ? tenant.journey?.heroSteps || totalSteps
     : totalSteps;
+
+  // Hub ativo na tela inicial (step 0): card e cabeçalho ficam pretos.
+  const isHubStep = step === 0 && hasHub;
 
   // Step 3D Transition Variants
   const stepVariants = {
@@ -227,26 +281,44 @@ export const TenantLink: React.FC = () => {
 
       <div
         className={`w-full max-w-md overflow-hidden flex flex-col relative my-auto min-h-[580px] transition-all ${
-          isGlass
+          isHubStep
+            ? 'rounded-[24px] border border-[#272727] bg-[#0A0A0A] text-white shadow-[0_24px_70px_rgba(0,0,0,0.85)]'
+            : isGlass
             ? 'rounded-[24px] border border-[rgba(255,235,210,0.14)] bg-[rgba(255,244,230,0.05)] backdrop-blur-[9px] backdrop-saturate-[1.2] shadow-[0_20px_60px_rgba(0,0,0,0.45)]'
             : 'bg-white/95 backdrop-blur-xs border border-[#E5E5E1] shadow-xl sm:shadow-2xl rounded-2xl sm:rounded-[40px]'
         }`}
-        style={isGlass ? { textShadow: '0 1px 12px rgba(0, 0, 0, 0.55)' } : undefined}
+        style={isGlass && !isHubStep ? { textShadow: '0 1px 12px rgba(0, 0, 0, 0.55)' } : undefined}
       >
         {/* Top Brand Bar */}
         <header
           className={`w-full p-5 sm:p-6 pb-3 flex items-center justify-between border-b ${
-            isGlass ? 'border-[rgba(255,235,210,0.10)]' : 'border-[#F0F0F0]'
+            isHubStep
+              ? 'border-[#222222] bg-[#0C0C0C]/80'
+              : isGlass
+              ? 'border-[rgba(255,235,210,0.10)]'
+              : 'border-[#F0F0F0]'
           }`}
         >
           <div className="flex items-center gap-2">
-            <span
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: accent, boxShadow: isGlass ? `0 0 8px ${accent}` : undefined }}
-            />
+            {isHubStep && tenant.hubHeaderLogo ? (
+              <img
+                src={tenant.hubHeaderLogo}
+                alt="Akis"
+                className="h-5 w-auto"
+              />
+            ) : (
+              <span
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: accent, boxShadow: isGlass ? `0 0 8px ${accent}` : undefined }}
+              />
+            )}
             <span
               className={`font-mono text-[10px] uppercase tracking-[0.18em] ${
-                isGlass ? 'text-[rgba(255,235,210,0.65)]' : 'text-[#888]'
+                isHubStep
+                  ? 'text-zinc-400'
+                  : isGlass
+                  ? 'text-[rgba(255,235,210,0.65)]'
+                  : 'text-[#888]'
               }`}
             >
               Nexo Link
@@ -287,17 +359,28 @@ export const TenantLink: React.FC = () => {
                 style={{ transformStyle: 'preserve-3d' }}
                 className="w-full will-change-transform"
               >
-                <TenantHero
-                  tenant={tenant}
-                  onStart={() => goToStep(1)}
-                  totalSteps={tenant.journey?.heroSteps || totalSteps}
-                />
-                {/* Prova social: só renderiza se tenant.testimonials tiver itens */}
-                <Testimonials
-                  testimonials={tenant.testimonials}
-                  accentColor={accent}
-                  variant={variant}
-                />
+                {hasHub && tenant.journey?.heroAccesses ? (
+                  <HubHero
+                    tenant={tenant}
+                    accesses={tenant.journey.heroAccesses}
+                    services={hubServices}
+                    onAccess={handleHubAccess}
+                  />
+                ) : (
+                  <>
+                    <TenantHero
+                      tenant={tenant}
+                      onStart={() => goToStep(1)}
+                      totalSteps={tenant.journey?.heroSteps || totalSteps}
+                    />
+                    {/* Prova social: só renderiza se tenant.testimonials tiver itens */}
+                    <Testimonials
+                      testimonials={tenant.testimonials}
+                      accentColor={accent}
+                      variant={variant}
+                    />
+                  </>
+                )}
               </motion.div>
             )}
 
@@ -322,14 +405,16 @@ export const TenantLink: React.FC = () => {
                 />
 
                 <DynamicStepRenderer
-                  stepConfig={visibleSteps[step - 1]}
-                  value={dynamicAnswers[visibleSteps[step - 1].field]}
+                  stepConfig={resolvedStepConfig || navSteps[step - 1]}
+                  value={dynamicAnswers[navSteps[step - 1].field]}
                   onChange={handleDynamicChange}
                   onNext={() => goToStep(step + 1)}
+                  onBack={() => goToStep(step - 1)}
                   accentColor={accent}
                   isLastStep={step === totalSteps}
                   variant={variant}
                   busyDates={tenant.booking?.busyDates}
+                  scheduleHint={scheduleSummary(tenant.booking)}
                 />
               </motion.div>
             )}
@@ -511,14 +596,14 @@ export const TenantLink: React.FC = () => {
                       </div>
                     )}
 
-                    {visibleSteps
+                    {dynamicSteps
                       .filter((st) => st.field !== 'name' && st.field !== 'phone')
                       .map((st) => {
                         const val = dynamicAnswers[st.field];
                         if (val === undefined || val === null || val === '') return null;
                         if (Array.isArray(val) && val.length === 0) return null;
                         // getStepDisplay resolve single/multi e formata type=date em pt-BR
-                        const display = getStepDisplay(visibleSteps, dynamicAnswers, st.field);
+                        const display = getStepDisplay(dynamicSteps, dynamicAnswers, st.field);
                         if (!display) return null;
 
                         return (
@@ -653,8 +738,10 @@ export const TenantLink: React.FC = () => {
           </AnimatePresence>
         </main>
 
-        {/* Footer: Customizado se configurado, senão padrão Nexo Link */}
-        {customFooter ? (
+        {/* Footer: escondido no hub (o hub já traz endereço e Instagrams) */}
+        {!isHubStep && (
+          <>
+            {customFooter ? (
           <footer
             id="tenant-custom-footer"
             className={`w-full p-4 sm:p-5 text-center border-t mt-auto flex flex-col items-center justify-center gap-1 text-[11px] tracking-wider ${
@@ -671,6 +758,8 @@ export const TenantLink: React.FC = () => {
           <footer className="w-full p-4 sm:p-5 text-center border-t border-[#F0F0F0] mt-auto flex items-center justify-center text-[10px] text-[#BBB] uppercase tracking-widest font-mono">
             <span>Via Nexo Link</span>
           </footer>
+        )}
+          </>
         )}
       </div>
     </div>

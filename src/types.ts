@@ -22,6 +22,24 @@ export interface JourneyStep {
    * Ex.: serviços da barbearia só quando direction === 'barber'.
    */
   when?: { field: string; equals: string | string[] };
+  /**
+   * Quando true e o campo já tem resposta (ex.: direção escolhida no
+   * hub da tela inicial), o step some da navegação — mas a resposta
+   * continua no resumo e na mensagem de WhatsApp.
+   */
+  skipIfAnswered?: boolean;
+  /**
+   * Origem dinâmica das opções (type === 'single'): 'bookingSlots'
+   * gera os horários livres a partir de `Tenant.booking` + da data
+   * respondida em `dependsOn`. Sem ele, usa `options`.
+   */
+  optionsSource?: 'bookingSlots';
+  /** Campo do qual este step depende (ex.: slot depende da data). Ao
+   * mudar a resposta dele, a resposta deste step é descartada. */
+  dependsOn?: string;
+  /** Somente para type === 'date': quando false, esconde o botão
+   * "Ainda sem data" (a data passa a ser obrigatória). Padrão: true. */
+  allowNoDate?: boolean;
   /** Somente para type === 'date': rótulo acima do input (padrão: "Data do evento"). */
   dateLabel?: string;
   /** Texto do botão quando este é o último step (padrão: "Concluir avaliação"). */
@@ -33,9 +51,32 @@ export interface JourneyStep {
   busyDates?: string[];
 }
 
-/** Agendamento: datas ocupadas do inquilino (marcação manual, sem Google Calendar). */
+/**
+ * Agendamento: datas ocupadas do inquilino (marcação manual, sem Google
+ * Calendar) + grade de disponibilidade gerenciada pelo responsável.
+ * - schedule: intervalos de atendimento por dia da semana (chaves
+ *   mon..sun, horas "HH:mm"). Dia ausente ou lista vazia = fechado.
+ * - blockedSlots: horários fechados pontualmente ("YYYY-MM-DDTHH:mm").
+ * - slotDurationMinutes: tamanho de cada horário (padrão 30).
+ * O cliente só vê os horários gerados daqui; o gestor edita estes
+ * campos no JSON do tenant (sem painel próprio por enquanto).
+ */
 export interface TenantBooking {
   busyDates?: string[];
+  slotDurationMinutes?: number;
+  schedule?: Record<string, [string, string][]>;
+  blockedSlots?: string[];
+}
+
+/** Acesso do hub (tela inicial com dois direcionamentos). */
+export interface HeroAccess {
+  /** Valor gravado no campo de direção (ex.: 'barber' | 'store'). */
+  value: string;
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  chips?: string[];
+  icon?: 'calendar' | 'bag';
 }
 
 /** Sinal via Pix exibido na tela final. Sem gateway: só chave + valor p/ copiar. */
@@ -72,6 +113,12 @@ export interface TenantJourney {
    * total varia conforme a direção escolhida (ex.: Akis: 7 na barbearia).
    */
   heroSteps?: number;
+  /**
+   * Acessos do hub: quando presente, a tela inicial vira o hub escuro
+   * com um cartão por acesso (em vez do hero + botão "Começar"). Cada
+   * acesso grava a direção e inicia a jornada no 1º passo.
+   */
+  heroAccesses?: HeroAccess[];
   steps: JourneyStep[];
 }
 
@@ -86,6 +133,16 @@ export interface Tenant {
   specialties?: string[];
   /** Texto do botão principal do hero (padrão: conforme o nicho). */
   heroCta?: string;
+  /** Hub: logo principal da tela inicial (ex.: logo oficial do tenant). */
+  heroLogo?: string;
+  /** Hub: foto de fundo da tela inicial (escurecida por overlay preto). */
+  heroBackground?: string;
+  /** Hub: logo compacta do cabeçalho da tela inicial (fundo escuro). */
+  hubHeaderLogo?: string;
+  /** Segundo Instagram (ex.: loja), exibido no hub junto ao principal. */
+  instagramSecondary?: string;
+  /** Link "como chegar" (Google Maps) exibido no hub. */
+  mapUrl?: string;
   whatsapp: string;
   instagram?: string;
   photo: string;

@@ -24,6 +24,10 @@ interface DynamicStepRendererProps {
   variant?: string;
   /** Datas ocupadas do inquilino (tenant.booking.busyDates), p/ etapas type === 'date'. */
   busyDates?: string[];
+  /** Volta ao passo anterior (usado pelo estado vazio da etapa de horários). */
+  onBack?: () => void;
+  /** Resumo legível da grade de atendimento, exibido na etapa de data. */
+  scheduleHint?: string;
 }
 
 export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
@@ -35,10 +39,82 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
   isLastStep,
   variant,
   busyDates,
+  onBack,
+  scheduleHint,
 }) => {
   const [inputFocused, setInputFocused] = useState(false);
   const [error, setError] = useState('');
   const isGlass = variant === 'glass';
+
+  // 0. Horários livres (optionsSource === 'bookingSlots'): grade compacta
+  // de chips HH:mm; sem horários no dia, oferece voltar e trocar a data.
+  if (stepConfig.type === 'single' && stepConfig.optionsSource === 'bookingSlots') {
+    const options = stepConfig.options || [];
+    const selectedId = typeof value === 'string' ? value : '';
+    const handleSelect = (id: string) => {
+      onChange(stepConfig.field, id);
+      setTimeout(() => {
+        onNext();
+      }, 160);
+    };
+
+    return (
+      <QuestionCard title={stepConfig.title} subtitle={stepConfig.subtitle} variant={variant}>
+        {options.length === 0 ? (
+          <div className="flex flex-col gap-4 items-center text-center py-2">
+            <p className={`text-sm leading-relaxed ${isGlass ? 'text-[rgba(255,235,210,0.8)]' : 'text-[#555]'}`}>
+              Sem horários livres neste dia — a agenda está cheia ou não há atendimento.
+            </p>
+            <button
+              id="slot-empty-back-btn"
+              type="button"
+              onClick={onBack}
+              className={`w-full py-3.5 px-6 rounded-xl font-medium text-sm sm:text-base tracking-wide transition-colors cursor-pointer border ${
+                isGlass
+                  ? 'text-[#FFF4E6] bg-[rgba(255,244,230,0.12)] border-[rgba(255,235,210,0.28)]'
+                  : 'text-white bg-[#1A1A1A] border-[#1A1A1A]'
+              }`}
+            >
+              ← Escolher outra data
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 w-full select-none">
+            {options.map((opt) => {
+              const isSelected = selectedId === opt.id;
+              return (
+                <motion.button
+                  key={opt.id}
+                  id={`slot-${opt.id}`}
+                  type="button"
+                  onClick={() => handleSelect(opt.id)}
+                  whileTap={{ scale: 0.96, transition: { duration: 0.1 } }}
+                  className={`py-3 px-1 rounded-xl font-mono font-medium text-sm text-center transition-colors cursor-pointer border ${
+                    isGlass
+                      ? 'backdrop-blur-md'
+                      : isSelected
+                      ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                      : 'bg-white hover:border-[#1A1A1A] text-[#1A1A1A] border-[#E5E5E1]'
+                  }`}
+                  style={
+                    isGlass
+                      ? {
+                          backgroundColor: isSelected ? 'rgba(228, 3, 46, 0.16)' : 'rgba(214, 178, 120, 0.07)',
+                          borderColor: isSelected ? accentColor : 'rgba(255, 235, 210, 0.16)',
+                          color: '#FFF4E6',
+                        }
+                      : undefined
+                  }
+                >
+                  {opt.label}
+                </motion.button>
+              );
+            })}
+          </div>
+        )}
+      </QuestionCard>
+    );
+  }
 
   // 1. Single Select
   if (stepConfig.type === 'single') {
@@ -167,6 +243,11 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
                 {formatEventDateBR(selectedDate)}
               </p>
             )}
+            {scheduleHint && !selectedDate && (
+              <p className={`text-xs mt-2 pl-1 ${isGlass ? 'text-[rgba(255,235,210,0.65)]' : 'text-[#888]'}`}>
+                Atendimento: {scheduleHint}
+              </p>
+            )}
             {isBusy && (
               <p id="date-busy-error" className="text-[#FF5252] text-xs mt-2 pl-1 font-medium">
                 Esta data já está ocupada — escolha outra ou continue sem data definida.
@@ -201,6 +282,8 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
             </div>
           )}
 
+          {/* "Ainda sem data" só aparece quando a etapa permite (allowNoDate !== false) */}
+          {stepConfig.allowNoDate !== false && (
           <button
             id="date-no-date-btn"
             type="button"
@@ -241,6 +324,7 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
               )}
             </span>
           </button>
+          )}
 
           <motion.button
             id={`finish-${stepConfig.field}-btn`}
