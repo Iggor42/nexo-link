@@ -148,6 +148,32 @@ oficial, endereço, Instagrams e um cartão por acesso), em vez do hero
   próprio) — o gestor pede a mudança e quem opera atualiza + deploy.
   Um painel self-service precisaria de backend/persistência.
 
+## 7. Mensagem de WhatsApp por direção (templates)
+
+`Tenant.whatsappTemplates` (regras com `when`, como os steps) vence
+sobre `whatsappTemplate` único; sem template, o resumo genérico:
+
+```json
+"whatsappTemplates": [
+  { "when": { "field": "direction", "equals": "barber" },
+    "template": "Meu nome é {name}, gostaria de agendar {services} dia {barberDate} às {slot}." },
+  { "when": { "field": "direction", "equals": "store" },
+    "template": "Meu nome é {name}, gostaria de atendimento na loja — {categories}, tamanho {size}, para {occasion}." }
+]
+```
+
+- Mensagem com template é integral: **não** recebe a linha de origem
+  ("Via Nexo Link | Origem: ..."). O genérico mantém a linha.
+- Placeholders `{name}`, `{tenant}` e `{field}` (data resolve no
+  formato longo pt-BR; multi resolve na lista de rótulos).
+
+## 8. Caixas de seleção — minimalistas e transparentes
+
+`OptionGrid`, `MultiSelectGrid` e a grade de horários usam, no tema
+claro, fundo transparente e sem sombra (só borda fina); o selecionado
+vira preenchimento sólido (accent/preto). Vale para todos os tenants
+— verificar caio/lucas a cada mudança visual nesses componentes.
+
 ## Fixture de teste: `/exemplo`
 
 `public/tenants/exemplo.json` é um inquilino **fictício, claramente
