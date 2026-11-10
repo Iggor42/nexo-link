@@ -87,6 +87,67 @@ Um step pode depender da resposta de outro campo:
   com a identidade monocromática da Akis. O componente próprio
   `AkisExperience` (dark luxury) foi removido.
 
+## 5. Hub escuro com acessos (Akis, 09/11/2026)
+
+Quando `journey.heroAccesses` existe, a tela inicial vira o hub escuro
+do padrão original do zip (fundo preto, foto ao fundo escurecida, logo
+oficial, endereço, Instagrams e um cartão por acesso), em vez do hero
++ botão "Começar". Cada acesso grava a direção e abre o 1º passo.
+
+```json
+"heroLogo": "/assets/akis-logo.png",
+"heroBackground": "/assets/akis-bg.webp",
+"hubHeaderLogo": "/assets/akis-logo-white.webp",
+"instagramSecondary": "akisformen_",
+"mapUrl": "https://www.google.com/maps/search/?api=1&query=...",
+"journey": { "heroAccesses": [
+  { "value": "barber", "title": "Agende o seu horário",
+    "subtitle": "Escolha o dia e o horário ideal para você",
+    "badge": "Cortes & Barba · Tabela oficial",
+    "chips": ["Corte R$ 30", "Corte+Barba R$ 50", "Barba R$ 20"],
+    "icon": "calendar" }
+]}
+```
+
+- O step de direção usa `skipIfAnswered: true`: escolhido no hub, ele
+  some da navegação, mas a resposta continua no resumo e no WhatsApp
+  (que iteram `dynamicSteps`, não só os visíveis).
+- O hub inclui "Tabela Completa" (modal com os serviços da jornada)
+  e "Chamar no Whats" (wa.me direto). No hub, card, cabeçalho e rodapé
+  ficam pretos; os passos seguintes mantêm o tema claro.
+- Imagens do hub são binárias: sobem pelo upload web do GitHub (o
+  snapshot push só aceita UTF-8) e o SHA do blob deve ser conferido
+  depois (`git hash-object` local vs. API).
+
+## 6. Disponibilidade gerenciada (agendamento com horários livres)
+
+`Tenant.booking` virou a grade do gestor (`src/lib/booking.ts`):
+
+```json
+"booking": {
+  "slotDurationMinutes": 30,
+  "schedule": { "mon": [["09:00","12:00"],["13:00","20:00"]], "sun": [] },
+  "blockedSlots": ["2026-11-20T14:00"],
+  "busyDates": ["2026-12-25"]
+}
+```
+
+- `schedule`: intervalos por dia da semana (mon..sun); dia ausente ou
+  vazio = fechado. `blockedSlots` fecha horários pontuais;
+  `busyDates` fecha o dia inteiro (e aparece riscado na etapa de data).
+- A etapa de horário é um step `single` com
+  `"optionsSource": "bookingSlots"` e `"dependsOn": "barberDate"`:
+  as opções são geradas na hora (só horários livres; hoje, os passados
+  somem). Sem horários no dia, a etapa mostra o estado vazio com
+  "Escolher outra data" (volta ao passo da data).
+- Trocar a data descarta o horário escolhido (`dependsOn`).
+- Etapa de data com `"allowNoDate": false` esconde "Ainda sem data"
+  (a data vira obrigatória). O resumo da grade ("Segunda a sábado ·
+  09h–12h e 13h–20h") aparece na etapa de data, gerado do `schedule`.
+- **Edição pelo gestor:** hoje é via JSON do tenant (sem painel
+  próprio) — o gestor pede a mudança e quem opera atualiza + deploy.
+  Um painel self-service precisaria de backend/persistência.
+
 ## Fixture de teste: `/exemplo`
 
 `public/tenants/exemplo.json` é um inquilino **fictício, claramente
