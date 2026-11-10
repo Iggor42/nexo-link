@@ -73,10 +73,10 @@ export const MultiSelectGrid: React.FC<MultiSelectGridProps> = ({
               } ${
                 isGlass
                   ? 'backdrop-blur-md shadow-xs'
-                  : `border shadow-xs active:shadow-none ${
+                  : `border active:shadow-none ${
                       isSelected
                         ? 'bg-[#1A1A1A] text-white'
-                        : 'bg-white hover:border-[#1A1A1A] text-[#1A1A1A] border-[#E5E5E1]'
+                        : 'bg-transparent hover:border-[#1A1A1A] text-[#1A1A1A] border-[#E5E5E1]'
                     }`
               }`}
               style={

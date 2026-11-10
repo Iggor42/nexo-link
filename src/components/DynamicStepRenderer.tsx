@@ -94,7 +94,7 @@ export const DynamicStepRenderer: React.FC<DynamicStepRendererProps> = ({
                       ? 'backdrop-blur-md'
                       : isSelected
                       ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
-                      : 'bg-white hover:border-[#1A1A1A] text-[#1A1A1A] border-[#E5E5E1]'
+                      : 'bg-transparent hover:border-[#1A1A1A] text-[#1A1A1A] border-[#E5E5E1]'
                   }`}
                   style={
                     isGlass

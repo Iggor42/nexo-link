@@ -52,6 +52,16 @@ export interface JourneyStep {
 }
 
 /**
+ * Regra de mensagem de WhatsApp por direção: quando `when` casa com as
+ * respostas, usa `template` (placeholders {name}, {tenant} e {field}).
+ * Mensagem com template é integral: não recebe a linha de origem.
+ */
+export interface WhatsappTemplateRule {
+  when?: { field: string; equals: string | string[] };
+  template: string;
+}
+
+/**
  * Agendamento: datas ocupadas do inquilino (marcação manual, sem Google
  * Calendar) + grade de disponibilidade gerenciada pelo responsável.
  * - schedule: intervalos de atendimento por dia da semana (chaves
@@ -167,6 +177,13 @@ export interface Tenant {
    * Se ausente, usa o resumo genérico por steps.
    */
   whatsappTemplate?: string;
+  /**
+   * Regras de mensagem por direção (ex.: uma frase p/ barbearia e outra
+   * p/ loja). A primeira regra cujo `when` casa com as respostas vence;
+   * sem `when`, vale sempre. Tem prioridade sobre `whatsappTemplate`.
+   * Mensagem com template não recebe a linha de origem.
+   */
+  whatsappTemplates?: WhatsappTemplateRule[];
 }
 
 export interface ConciergeWebhookPayload {

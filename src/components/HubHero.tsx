@@ -35,12 +35,6 @@ export const HubHero: React.FC<HubHeroProps> = ({ tenant, accesses, services, on
     'Olá! Gostaria de informações sobre os serviços e atendimento da Akis.'
   );
 
-  // Endereço vem do footer ("Rua Padre Vieira, nº 448 · São Judas · Montes Claros/MG")
-  const addressLine = tenant.footer?.lines?.[1] || '';
-  const addressParts = addressLine.split(' · ');
-  const addressMain = addressParts[0] || addressLine;
-  const addressSub = addressParts.slice(1).join(' · ');
-
   const fadeIn = {
     initial: { opacity: 0, y: reducedMotion ? 0 : 12 },
     animate: { opacity: 1, y: 0 },
@@ -70,7 +64,7 @@ export const HubHero: React.FC<HubHeroProps> = ({ tenant, accesses, services, on
             initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-1 mb-3"
+            className="mt-2 mb-4"
           >
             <img
               src={tenant.heroLogo}
@@ -80,48 +74,8 @@ export const HubHero: React.FC<HubHeroProps> = ({ tenant, accesses, services, on
           </motion.div>
         )}
 
-        {/* Subtítulo com linhas laterais */}
-        <div className="w-full flex items-center justify-center gap-3 my-1">
-          <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-[#444]" />
-          <h2 className="font-urban text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-zinc-300 whitespace-nowrap">
-            Barbearia | Loja Masculina
-          </h2>
-          <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-[#444]" />
-        </div>
-
-        {tenant.tagline && (
-          <p className="text-xs italic text-zinc-400 mt-1 mb-3">{tenant.tagline}</p>
-        )}
-
-        {/* Localização */}
-        {addressLine && (
-          <a
-            href={tenant.mapUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Abrir no Google Maps"
-            className="group my-2 px-4 py-2 rounded-xl bg-[#161616]/90 hover:bg-[#1C1C1C] border border-[#2A2A2A] hover:border-zinc-500 transition-all flex flex-col items-center justify-center cursor-pointer shadow-sm"
-          >
-            <div className="flex items-center gap-2 text-white font-urban text-xs sm:text-sm font-bold tracking-wider uppercase">
-              <svg className="w-4 h-4 text-white group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-              </svg>
-              <span>{addressMain}</span>
-            </div>
-            {addressSub && (
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="w-6 h-[1px] bg-zinc-600" />
-                <span className="font-urban text-[10px] sm:text-[11px] font-semibold text-zinc-400 uppercase tracking-[0.2em]">
-                  {addressSub}
-                </span>
-                <span className="w-6 h-[1px] bg-zinc-600" />
-              </div>
-            )}
-          </a>
-        )}
-
         {/* Instagrams */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-5 mt-1">
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-6 mt-1">
           {[tenant.instagram, tenant.instagramSecondary].filter(Boolean).map((handle) => (
             <a
               key={handle}

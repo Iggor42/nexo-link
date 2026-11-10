@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { UTMParams, ConciergeWebhookPayload, JourneyStep } from '../types';
+import type { UTMParams, ConciergeWebhookPayload, JourneyStep, WhatsappTemplateRule } from '../types';
 
 export function cleanPhoneDigits(val: string): string {
   return val.replace(/\D/g, '');
@@ -157,15 +157,18 @@ function buildOriginLine(utms: UTMParams = {}): string {
 
 /**
  * Monta a mensagem de fallback wa.me a partir da jornada dinâmica.
- * Se o tenant definiu `whatsappTemplate` no JSON, usa o template com
- * placeholders {name}, {tenant} e {field}; senão, gera o resumo genérico.
+ * Prioridade: 1ª regra de `templates` cujo `when` casa com as respostas;
+ * depois `template` único; senão, o resumo genérico por steps.
+ * Mensagem com template é integral (sem linha de origem); o genérico
+ * mantém "Via Nexo Link | Origem: ...".
  */
 export function buildDynamicWhatsAppMessage(
   steps: JourneyStep[],
   answers: Record<string, unknown>,
   utms: UTMParams = {},
   template?: string,
-  tenantName?: string
+  tenantName?: string,
+  templates?: WhatsappTemplateRule[]
 ): string {
   const name =
     typeof answers.name === 'string' && answers.name.trim()
@@ -173,10 +176,16 @@ export function buildDynamicWhatsAppMessage(
       : 'Cliente';
   const tenantFirst = tenantName ? tenantName.trim().split(/\s+/)[0] : '';
 
-  let body: string;
+  const ruleTemplate = templates?.find((r) => {
+    if (!r.when) return true;
+    const v = answers[r.when.field];
+    const eq = r.when.equals;
+    return Array.isArray(eq) ? eq.includes(v as string) : v === eq;
+  })?.template;
+  const activeTemplate = ruleTemplate || template;
 
-  if (template && template.trim()) {
-    body = template
+  if (activeTemplate && activeTemplate.trim()) {
+    let body = activeTemplate
       .replace(/\{tenant\}/g, tenantFirst)
       .replace(/\{name\}/g, name);
     for (const step of steps) {
@@ -191,19 +200,19 @@ export function buildDynamicWhatsAppMessage(
       .replace(/\{[a-zA-Z0-9_]+\}/g, '')
       .replace(/[ \t]{2,}/g, ' ')
       .trim();
-  } else {
-    const lines: string[] = [`Olá! Meu nome é ${name}.`, '', 'Resumo da solicitação:'];
-
-    for (const step of steps) {
-      if (step.field === 'name' || step.field === 'phone') continue;
-      const display = getStepDisplay(steps, answers, step.field);
-      if (!display) continue;
-      lines.push(`${step.title}: ${display}`);
-    }
-
-    body = lines.join('\n');
+    return body;
   }
 
+  const lines: string[] = [`Olá! Meu nome é ${name}.`, '', 'Resumo da solicitação:'];
+
+  for (const step of steps) {
+    if (step.field === 'name' || step.field === 'phone') continue;
+    const display = getStepDisplay(steps, answers, step.field);
+    if (!display) continue;
+    lines.push(`${step.title}: ${display}`);
+  }
+
+  const body = lines.join('\n');
   return `${body}\n\n—\n${buildOriginLine(utms)}`;
 }
 

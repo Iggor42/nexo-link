@@ -49,10 +49,10 @@ export const OptionGrid: React.FC<OptionGridProps> = ({
             className={`w-full text-left p-4 rounded-xl transition-colors duration-150 cursor-pointer flex items-center justify-between will-change-transform ${
               isGlass
                 ? 'backdrop-blur-md shadow-xs'
-                : `border shadow-xs active:shadow-none ${
+                : `border active:shadow-none ${
                     isSelected
                       ? 'bg-[#1A1A1A] text-white'
-                      : 'bg-white hover:border-[#1A1A1A] text-[#1A1A1A] border-[#E5E5E1]'
+                      : 'bg-transparent hover:border-[#1A1A1A] text-[#1A1A1A] border-[#E5E5E1]'
                   }`
             }`}
             style={

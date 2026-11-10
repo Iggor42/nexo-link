@@ -181,7 +181,8 @@ export const TenantLink: React.FC = () => {
       dynamicAnswers,
       utms,
       tenant.whatsappTemplate,
-      tenant.name
+      tenant.name,
+      tenant.whatsappTemplates
     );
     return buildWhatsAppUrl(tenant.whatsapp, message);
   }, [tenant, dynamicSteps, dynamicAnswers, utms]);
